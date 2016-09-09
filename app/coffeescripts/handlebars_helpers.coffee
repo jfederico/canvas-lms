@@ -119,11 +119,11 @@ define [
       tz.format(datetime, '%m/%d/%Y')
 
     # Convert the total amount of minutes into a Hours:Minutes format.
-    # minutesToHM : (minutes) ->
-    #   hours = Math.floor(minutes / 60)
-    #   real_minutes = minutes % 60
-    #   real_min_str = (if real_minutes < 10 then "0" + real_minutes else real_minutes)
-    #   "#{hours}:#{real_min_str}"
+    minutesToHM : (minutes) ->
+      hours = Math.floor(minutes / 60)
+      real_minutes = minutes % 60
+      real_min_str = (if real_minutes < 10 then "0" + real_minutes else real_minutes)
+      "#{hours}:#{real_min_str}"
 
     # Convert the total amount of minutes into a readable duration format.
     durationToString : (minutes) ->

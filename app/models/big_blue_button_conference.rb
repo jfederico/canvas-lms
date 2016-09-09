@@ -24,14 +24,6 @@ class BigBlueButtonConference < WebConference
   after_destroy :end_meeting
   after_destroy :delete_all_recordings
 
-  user_setting_field :record, {
-    name: ->{ t('recording_setting', 'Recording') },
-    description: ->{ t('recording_setting_enabled_description', 'Enable recording for this conference') },
-    type: :boolean,
-    default: false,
-    visible: ->{ WebConference.config(BigBlueButtonConference.to_s)[:recording_enabled] },
-  }
-
   def initiate_conference
     return conference_key if conference_key && !retouch?
     unless self.conference_key
@@ -44,7 +36,7 @@ class BigBlueButtonConference < WebConference
       settings[:user_key] = 8.times.map{ chars[chars.size * rand] }.join
       settings[:admin_key] = 8.times.map{ chars[chars.size * rand] }.join until settings[:admin_key] && settings[:admin_key] != settings[:user_key]
     end
-    settings[:record] &&= config[:recording_enabled]
+    settings[:record] = config[:recording_enabled]
     current_host = URI(settings[:default_return_url] || "http://www.instructure.com").host
     send_request(:create, {
       :meetingID => conference_key,
