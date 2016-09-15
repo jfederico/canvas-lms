@@ -79,12 +79,21 @@ class BigBlueButtonConference < WebConference
 
   def recordings
     fetch_recordings.map do |recording|
-      recording_format = recording.fetch(:playback, {}).fetch(:format, {})
-      {
-        recording_id:     recording[:recordID],
-        duration_minutes: recording_format[:length].to_i,
-        playback_url:     recording_format[:url],
+      recording_formats = recording.fetch(:playback, {})
+      returnHash = {
+        recording_id:       recording[:recordID],
+        recording_formats:  []
       }
+      recording_formats.each do |recording_format|
+        returnHash[:recording_formats] << {
+          type:             recording_format[:type].capitalize,
+          duration_minutes: recording_format[:length].to_i,
+          playback_url:     recording_format[:url],
+          images:           recording_format[:preview] && recording_format[:preview][:images] ? recording_format[:preview][:images] : false,
+          text:             recording_format[:preview] && recording_format[:preview][:text] ? recording_format[:preview][:text] : false
+        }
+      end
+      returnHash
     end
   end
 
@@ -151,7 +160,18 @@ class BigBlueButtonConference < WebConference
   def generate_request(action, options)
     query_string = options.to_query
     query_string << ("&checksum=" + Digest::SHA1.hexdigest(action.to_s + query_string + config[:secret_dec]))
-    "http://#{config[:domain]}/bigbluebutton/api/#{action}?#{query_string}"
+    returnUrl = config[:domain]
+    returnUrl.slice!(-1) if returnUrl[-1]=="/"
+    unless returnUrl.include?("http://") && returnUrl.include?("/api")
+      if returnUrl.include?("http://") && !returnUrl.include?("/api")
+        returnUrl = "#{returnUrl}/bigbluebutton/api"
+      elsif !returnUrl.include?("http://") && returnUrl.include?("/api")
+        returnUrl = "http://#{returnUrl}"
+      else
+        returnUrl = "http://#{returnUrl}/api"
+      end
+    end
+    "#{returnUrl}/#{action}?#{query_string}"
   end
 
   def send_request(action, options)
@@ -198,7 +218,8 @@ class BigBlueButtonConference < WebConference
     # The BBB API follows the pattern where a plural element (ie <bars>)
     # contains many singular elements (ie <bar>) and nothing else. Detect this
     # and return an array to be assigned to the plural element.
-    elsif node.name.singularize == child_elements.first.name
+    # Also if the node name is playback so that it returns an array of all the available recording formats
+  elsif node.name.singularize == child_elements.first.name || node.name=="playback"
       child_elements.map { |child| xml_to_value(child) }
     # otherwise, make a hash of the child elements
     else
