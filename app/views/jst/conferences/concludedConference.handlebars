@@ -61,10 +61,10 @@
       {{#each recordings}}
         <li>
           <div class="ig-row">
-            <div class="ig-row__layout">
-              <div class="ig-info">
-                {{#if recording_formats}}
-                  {{#each recording_formats}}
+            {{#if recording_formats}}
+              {{#each recording_formats}}
+                <div class="ig-row__layout">
+                  <div class="ig-info">
                     <div class="ig-details">
                       {{#text}}
                         {{text}}
@@ -77,12 +77,21 @@
                       </a>
                       {{dateString created_at}}
                       &nbsp;&#124;&nbsp;
-                      {{#t "format"}}Format{{/t}}: {{type}}
+                      {{type}}
                       &nbsp;&#124;&nbsp;
                       {{durationToString duration_minutes}}
                     </div>
-                  {{/each}}
-                {{else}}
+                  </div>
+                  <div class="ig-button">
+                    <a class="btn btn-small" target="_blank" href="{{playback_url}}">
+                      {{#t "view"}}View{{/t}}
+                    </a>
+                  </div>
+                </div>
+              {{/each}}
+            {{else}}
+              <div class="ig-row__layout">
+                <div class="ig-info">
                   <div class="ig-details">
                     <a href="{{playback_url}}" target="_blank" class="ig-title">
                       {{title}}
@@ -91,14 +100,14 @@
                     &nbsp;&#124;&nbsp;
                     {{durationToString duration_minutes}}
                   </div>
-                {{/if}}
+                </div>
+                <div class="ig-button">
+                  <a class="btn btn-small" target="_blank" href="{{playback_url}}">
+                    {{#t "view"}}View{{/t}}
+                  </a>
+                </div>
               </div>
-              <div class="ig-button">
-                <a class="btn btn-small" target="_blank" href="{{playback_url}}">
-                  {{#t "view"}}View{{/t}}
-                </a>
-              </div>
-            </div>
+            {{/if}}
           </div>
         </li>
       {{/each}}
