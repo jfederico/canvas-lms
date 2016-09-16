@@ -82,16 +82,19 @@ class BigBlueButtonConference < WebConference
       recording_formats = recording.fetch(:playback, {})
       returnHash = {
         recording_id:       recording[:recordID],
-        recording_formats:  []
+        recording_formats:  [],
+        published:          recording[:published],
+        duration_minutes:   recording_formats.empty? ? 0 : recording_formats.first[:length].to_i,
+        images:             [],
+        text:               []
       }
       recording_formats.each do |recording_format|
         returnHash[:recording_formats] << {
           type:             recording_format[:type].capitalize,
-          duration_minutes: recording_format[:length].to_i,
-          playback_url:     recording_format[:url],
-          images:           recording_format[:preview] && recording_format[:preview][:images] ? recording_format[:preview][:images] : false,
-          text:             recording_format[:preview] && recording_format[:preview][:text] ? recording_format[:preview][:text] : false
+          playback_url:     recording_format[:url]
         }
+        returnHash[:images] = recording_format[:preview][:images] if recording_format[:preview] && recording_format[:preview][:images]
+        returnHash[:text] = recording_format[:preview][:text] if recording_format[:preview] && recording_format[:preview][:text]
       end
       returnHash
     end
@@ -133,11 +136,13 @@ class BigBlueButtonConference < WebConference
   end
 
   def end_meeting
-    response = send_request(:end, {
-      :meetingID => conference_key,
-      :password => settings[(type == :user ? :user_key : :admin_key)],
-      })
-    response[:ended] if response
+    if self.ended_at.nil?
+      response = send_request(:end, {
+        :meetingID => conference_key,
+        :password => settings[(type == :user ? :user_key : :admin_key)],
+        })
+      response[:ended] if response
+    end
   end
 
   def fetch_recordings
@@ -155,6 +160,22 @@ class BigBlueButtonConference < WebConference
       :recordID => recording_id,
       })
     response[:deleted] if response
+  end
+
+  def publish_recording(recording_id)
+    response = send_request(:publishRecordings, {
+      :recordID => recording_id,
+      :publish  => "true"
+      })
+    response[:published] if response
+  end
+
+  def unpublish_recording(recording_id)
+    response = send_request(:publishRecordings, {
+      :recordID => recording_id,
+      :publish  => "false"
+      })
+    response[:published] if response
   end
 
   def generate_request(action, options)
@@ -218,8 +239,8 @@ class BigBlueButtonConference < WebConference
     # The BBB API follows the pattern where a plural element (ie <bars>)
     # contains many singular elements (ie <bar>) and nothing else. Detect this
     # and return an array to be assigned to the plural element.
-    # Also if the node name is playback so that it returns an array of all the available recording formats
-  elsif node.name.singularize == child_elements.first.name || node.name=="playback"
+    # Also if the node name is playback, so that it returns an array of all the available recording formats
+    elsif node.name.singularize == child_elements.first.name || node.name=="playback"
       child_elements.map { |child| xml_to_value(child) }
     # otherwise, make a hash of the child elements
     else

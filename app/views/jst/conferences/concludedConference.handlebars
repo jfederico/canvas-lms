@@ -61,36 +61,39 @@
       {{#each recordings}}
         <li>
           <div class="ig-row">
-            {{#if recording_formats}}
-              {{#each recording_formats}}
-                <div class="ig-row__layout">
-                  <div class="ig-info">
-                    <div class="ig-details">
-                      {{#text}}
-                        {{text}}
-                      {{/text}}
-                      {{#images}}
-                        <img src="{{image}}" />
-                      {{/images}}
-                      <a href="{{playback_url}}" target="_blank" class="ig-title">
-                        {{title}}
+            <div class="ig-row__layout">
+              {{#if recording_formats}}
+                <div class="ig-info">
+                  <div class="ig-details">
+                    {{#each recording_formats}}
+                      <a href="{{playback_url}}" target="_blank" class="ig-title" style="line-height: inherit;">
+                        {{type}}
                       </a>
-                      {{dateString created_at}}
-                      &nbsp;&#124;&nbsp;
-                      {{type}}
-                      &nbsp;&#124;&nbsp;
-                      {{durationToString duration_minutes}}
-                    </div>
+                    {{/each}}
+                    &#124;&nbsp;
+                    {{durationToString duration_minutes}}
                   </div>
-                  <div class="ig-button">
-                    <a class="btn btn-small" target="_blank" href="{{playback_url}}">
-                      {{#t "view"}}View{{/t}}
-                    </a>
-                  </div>
+                  {{#each images}}
+                    <img src="{{image}}" style="width: 150px; padding: 10px 5px 10px 0;" />
+                  {{/each}}
+                  {{#each text}}
+                    {{text}}
+                  {{/each}}
                 </div>
-              {{/each}}
-            {{else}}
-              <div class="ig-row__layout">
+                {{#if ../../permissions.delete}}
+                  <div class="ig-button">
+                    {{#if ../published}}
+                      <a class="btn btn-small">
+                        UNPUBLISH
+                      </a>
+                    {{else}}
+                      <a class="btn btn-small">
+                        PUBLISH
+                      </a>
+                    {{/if}}
+                  </div>
+                {{/if}}
+              {{else}}
                 <div class="ig-info">
                   <div class="ig-details">
                     <a href="{{playback_url}}" target="_blank" class="ig-title">
@@ -106,8 +109,8 @@
                     {{#t "view"}}View{{/t}}
                   </a>
                 </div>
-              </div>
-            {{/if}}
+              {{/if}}
+            </div>
           </div>
         </li>
       {{/each}}
