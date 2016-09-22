@@ -80,30 +80,56 @@ class BigBlueButtonConference < WebConference
   def recordings
     fetch_recordings.map do |recording|
       recording_formats = recording.fetch(:playback, {})
-      returnHash = {
+      recordingHash = {
         recording_id:       recording[:recordID],
+        published:          recording[:published]=="true" ? true : false,
+        duration_minutes:   recording_formats.first[:length].to_i,
         recording_formats:  [],
-        published:          recording[:published],
-        duration_minutes:   recording_formats.empty? ? 0 : recording_formats.first[:length].to_i,
-        images:             [],
-        text:               []
+        images:             []
       }
       recording_formats.each do |recording_format|
-        returnHash[:recording_formats] << {
+        recordingHash[:recording_formats] << {
           type:             recording_format[:type].capitalize,
           playback_url:     recording_format[:url]
         }
-        returnHash[:images] = recording_format[:preview][:images] if recording_format[:preview] && recording_format[:preview][:images]
-        returnHash[:text] = recording_format[:preview][:text] if recording_format[:preview] && recording_format[:preview][:text]
+        recordingHash[:images] = recording_format[:preview][:images] if recording_format[:preview] && recording_format[:preview][:images]
       end
-      returnHash
+      recordingHash
     end
   end
 
   def delete_all_recordings
-    fetch_recordings.map do |recording|
-      delete_recording recording[:recordID]
+    recordings = []
+    fetch_recordings.map{ |recording| recordings<<recording[:recordID] }
+    unless recordings.empty?
+      response = send_request(:deleteRecordings, {
+        :recordID => recordings.join(",")
+        })
+      response[:deleted] if response
     end
+  end
+
+  def delete_recording(recording_id)
+    response = send_request(:deleteRecordings, {
+      :recordID => recording_id,
+      })
+    response[:deleted] if response
+  end
+
+  def publish_recording(recording_id)
+    response = send_request(:publishRecordings, {
+      :recordID => recording_id,
+      :publish  => "true"
+      })
+    response[:published] if response
+  end
+
+  def unpublish_recording(recording_id)
+    response = send_request(:publishRecordings, {
+      :recordID => recording_id,
+      :publish  => "false"
+      })
+    response[:published] if response
   end
 
   def close
@@ -153,29 +179,6 @@ class BigBlueButtonConference < WebConference
     result = response[:recordings] if response
     result = [] if result.is_a?(String)
     Array(result)
-  end
-
-  def delete_recording(recording_id)
-    response = send_request(:deleteRecordings, {
-      :recordID => recording_id,
-      })
-    response[:deleted] if response
-  end
-
-  def publish_recording(recording_id)
-    response = send_request(:publishRecordings, {
-      :recordID => recording_id,
-      :publish  => "true"
-      })
-    response[:published] if response
-  end
-
-  def unpublish_recording(recording_id)
-    response = send_request(:publishRecordings, {
-      :recordID => recording_id,
-      :publish  => "false"
-      })
-    response[:published] if response
   end
 
   def generate_request(action, options)
@@ -235,7 +238,16 @@ class BigBlueButtonConference < WebConference
       nil
     # If no child_elements, this is probably a text node, so just return its content
     elsif child_elements.empty?
-      node.content
+      if node.name =="image"
+        {
+          :width            =>  node.attributes["width"].value,
+          :height           =>  node.attributes["height"].value,
+          :title            =>  node.attributes["alt"].value,
+          :thumbnail_url    =>  node.content
+        }
+      else
+        node.content
+      end
     # The BBB API follows the pattern where a plural element (ie <bars>)
     # contains many singular elements (ie <bar>) and nothing else. Detect this
     # and return an array to be assigned to the plural element.

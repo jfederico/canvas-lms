@@ -21,6 +21,9 @@ define [
       'click .close_conference_link': 'close'
       'click .start-button': 'start'
       'click .external_url': 'external'
+      'click .publish_recording_link': 'publish_recording'
+      'click .unpublish_recording_link': 'unpublish_recording'
+      'click .delete_recording_link': 'delete_recording'
 
     initialize: ->
       super
@@ -51,6 +54,30 @@ define [
       return if !confirm(I18n.t('confirm.close', "Are you sure you want to end this conference?\n\nYou will not be able to reopen it."))
       $.ajaxJSON($(e.currentTarget).attr('href'), "POST", {}, (data) =>
         window.router.close(@model)
+      )
+
+    publish_recording: (e) ->
+      e.preventDefault()
+      $.ajaxJSON($(e.currentTarget).attr('href') + "/publish_recording", "POST", {
+          recording_id: $(e.currentTarget).data("id");
+        }, (data) =>
+          console.dir data
+      )
+
+    unpublish_recording: (e) ->
+      e.preventDefault()
+      $.ajaxJSON($(e.currentTarget).attr('href') + "/unpublish_recording", "POST", {
+          recording_id: $(e.currentTarget).data("id");
+        }, (data) =>
+          console.dir data
+      )
+
+    delete_recording: (e) ->
+      e.preventDefault()
+      $.ajaxJSON($(e.currentTarget).attr('href') + "/delete_recording", "POST", {
+          recording_id: $(e.currentTarget).data("id");
+        }, (data) =>
+          window.location.reload(true)
       )
 
     start: (e) ->

@@ -60,40 +60,43 @@
     <ul>
       {{#each recordings}}
         <li>
-          <div class="ig-row">
-            <div class="ig-row__layout">
-              {{#if recording_formats}}
+          {{#if recording_formats}}
+            <div class="ig-row">
+              <div class="ig-row__layout">
                 <div class="ig-info">
                   <div class="ig-details">
                     {{#each recording_formats}}
-                      <a href="{{playback_url}}" target="_blank" class="ig-title" style="line-height: inherit;">
+                      <a href="{{#if ../../published}} {{playback_url}} {{/if}}" target="{{#if ../../published}} _blank {{/if}}" class="ig-title" style="line-height: inherit;">
                         {{type}}
                       </a>
                     {{/each}}
                     &#124;&nbsp;
                     {{durationToString duration_minutes}}
                   </div>
-                  {{#each images}}
-                    <img src="{{image}}" style="width: 150px; padding: 10px 5px 10px 0;" />
-                  {{/each}}
-                  {{#each text}}
-                    {{text}}
-                  {{/each}}
                 </div>
                 {{#if ../../permissions.delete}}
                   <div class="ig-button">
-                    {{#if ../published}}
-                      <a class="btn btn-small">
-                        UNPUBLISH
-                      </a>
-                    {{else}}
-                      <a class="btn btn-small">
-                        PUBLISH
-                      </a>
-                    {{/if}}
+                    <a href="{{../../../url}}" class="btn btn-small {{#if ../published}}icon-unpublish unpublish_recording_link{{else}}icon-publish publish_recording_link{{/if}}"
+                        data-id="{{ recording_id }}">
+                        {{#if ../published}}
+                          {{#t 'unpublish'}}Unpublish{{/t}}
+                        {{else}}
+                          {{#t 'publish'}}Publish{{/t}}
+                        {{/if}}
+                    </a>
+                    <a href="{{../../../url}}" class="btn btn-small icon-trash delete_recording_link" data-id="{{ recording_id }}">
+                      {{#t "delete"}}Delete{{/t}}
+                    </a>
                   </div>
                 {{/if}}
-              {{else}}
+              </div>
+              {{#each images}}
+                <img src="{{thumbnail_url}}" title="{{title}}" alt="{{title}}" style="padding: 10px 5px 10px 0;" />
+              {{/each}}
+            </div>
+          {{else}}
+            <div class="ig-row">
+              <div class="ig-row__layout">
                 <div class="ig-info">
                   <div class="ig-details">
                     <a href="{{playback_url}}" target="_blank" class="ig-title">
@@ -109,9 +112,9 @@
                     {{#t "view"}}View{{/t}}
                   </a>
                 </div>
-              {{/if}}
+              </div>
             </div>
-          </div>
+          {{/if}}
         </li>
       {{/each}}
     </ul>

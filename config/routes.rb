@@ -147,6 +147,9 @@ CanvasRails::Application.routes.draw do
       match :join, via: [:get, :post]
       match :close, via: [:get, :post]
       get :settings
+      match :publish_recording, via: [:post]
+      match :unpublish_recording, via: [:post]
+      match :delete_recording, via: [:post]
     end
   end
 
