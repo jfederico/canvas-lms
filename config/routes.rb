@@ -150,6 +150,7 @@ CanvasRails::Application.routes.draw do
       match :publish_recording, via: [:post]
       match :unpublish_recording, via: [:post]
       match :delete_recording, via: [:post]
+      get :BBBLogout
     end
   end
 

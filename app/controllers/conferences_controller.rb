@@ -379,6 +379,9 @@ class ConferencesController < ApplicationController
     end
   end
 
+  def BBBLogout
+  end
+
   protected
 
   def require_config

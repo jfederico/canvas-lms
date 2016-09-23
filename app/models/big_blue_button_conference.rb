@@ -38,13 +38,14 @@ class BigBlueButtonConference < WebConference
     end
     settings[:record] = config[:recording_enabled]
     current_host = URI(settings[:default_return_url] || "http://www.instructure.com").host
+
     send_request(:create, {
       :meetingID => conference_key,
       :name => title,
       :voiceBridge => "%020d" % self.global_id,
       :attendeePW => settings[:user_key],
       :moderatorPW => settings[:admin_key],
-      :logoutURL => (settings[:default_return_url] || "http://www.instructure.com"),
+      :logoutURL => (settings[:default_return_url]+"/conferences/#{self.id}/BBBLogout" || "http://www.instructure.com"),
       :record => settings[:record] ? "true" : "false",
       :welcome => settings[:record] ? t("This conference may be recorded.") : "",
       "meta_canvas-recording-ready-url" => recording_ready_url(current_host)
@@ -92,7 +93,9 @@ class BigBlueButtonConference < WebConference
           type:             recording_format[:type].capitalize,
           playback_url:     recording_format[:url]
         }
-        recordingHash[:images] = recording_format[:preview][:images] if recording_format[:preview] && recording_format[:preview][:images]
+        if recording_format[:preview] && recording_format[:preview][:images] && recording_format[:preview][:images].length > recordingHash[:images].length
+          recordingHash[:images] = recording_format[:preview][:images]
+        end
       end
       recordingHash
     end
@@ -188,10 +191,18 @@ class BigBlueButtonConference < WebConference
     returnUrl.slice!(-1) if returnUrl[-1]=="/"
     unless returnUrl.include?("http://") && returnUrl.include?("/api")
       if returnUrl.include?("http://") && !returnUrl.include?("/api")
-        returnUrl = "#{returnUrl}/bigbluebutton/api"
+        if returnUrl.include?("/bigbluebutton")
+          #For URLs in the format http://ip/bigbluebutton
+          returnUrl = "#{returnUrl}/api"
+        else
+          #For URLs in the format http://ip
+          returnUrl = "#{returnUrl}/bigbluebutton/api"
+        end
       elsif !returnUrl.include?("http://") && returnUrl.include?("/api")
+        #For URLs in the format ip/bigbluebutton/api
         returnUrl = "http://#{returnUrl}"
       else
+        #For URLs only including the IP address
         returnUrl = "http://#{returnUrl}/api"
       end
     end
@@ -238,7 +249,7 @@ class BigBlueButtonConference < WebConference
       nil
     # If no child_elements, this is probably a text node, so just return its content
     elsif child_elements.empty?
-      if node.name =="image"
+      if node.name == "image"
         {
           :width            =>  node.attributes["width"].value,
           :height           =>  node.attributes["height"].value,
