@@ -5,7 +5,8 @@ define [
   'jst/conferences/newConference'
   'jquery.google-analytics'
   'compiled/jquery.rails_flash_notifications'
-], (I18n, $, {View}, template) ->
+  'vendor/spin'
+], (I18n, $, {View}, template, Spinner) ->
 
   class ConferenceView extends View
 
@@ -61,19 +62,25 @@ define [
       $.ajaxJSON($(e.currentTarget).attr('href') + "/publish_recording", "POST", {
           recording_id: $(e.currentTarget).data("id");
         }, (data) =>
-          console.dir data
+          $.flashMessage I18n.t('recordings.publish_success', 'Your "publish recording" request was received. Please check back later to view its new status.')
+          $(e.currentTarget).attr('disabled','disabled')
       )
 
     unpublish_recording: (e) ->
       e.preventDefault()
+      return if !confirm(I18n.t('recordings.confirm.unpublish', "Are you sure you want to unpublish this recording?\n\nNobody will be able to see it."))
       $.ajaxJSON($(e.currentTarget).attr('href') + "/unpublish_recording", "POST", {
           recording_id: $(e.currentTarget).data("id");
         }, (data) =>
-          console.dir data
+          $.flashMessage I18n.t('recordings.unpublish_success', 'Your "unpublish recording" request was received. Please check back later to view its new status.')
+          $(e.currentTarget).attr('disabled','disabled')
+          $('a[data-id="' + $(e.currentTarget).data("id") + '"]').removeAttr("href");
+          $('a[data-id="' + $(e.currentTarget).data("id") + '"]').children("span").last().remove()
       )
 
     delete_recording: (e) ->
       e.preventDefault()
+      return if !confirm(I18n.t('recordings.confirm.delete', "Are you sure you want to delete this recording?\n\nYou will not be able to reopen it."))
       $.ajaxJSON($(e.currentTarget).attr('href') + "/delete_recording", "POST", {
           recording_id: $(e.currentTarget).data("id");
         }, (data) =>

@@ -66,7 +66,8 @@
                 <div class="ig-info">
                   <div class="ig-details">
                     {{#each recording_formats}}
-                      <a href="{{#if ../../published}} {{playback_url}} {{/if}}" target="{{#if ../../published}} _blank {{/if}}" class="ig-title" style="line-height: inherit;">
+                      <a href="{{#if ../../published}} {{playback_url}} {{/if}}" target="{{#if ../../published}} _blank {{/if}}"
+                        class="ig-title" data-id="{{../recording_id}}" style="line-height: inherit;">
                         {{type}}
                       </a>
                     {{/each}}
