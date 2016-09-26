@@ -25,5 +25,11 @@
         <%= f.check_box :recording_enabled %> <%= f.label :recording_enabled, :en => "Allow conferences to be recorded." %>
       </td>
     </tr>
+    <tr>
+      <td></td>
+      <td>
+        <%= f.check_box :recording_ready_notifications_enabled %> <%= f.label :recording_ready_notifications_enabled, :en => "Send notifications when recording is ready." %>
+      </td>
+    </tr>
   </table>
 <% end %>
