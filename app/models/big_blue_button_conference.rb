@@ -203,7 +203,7 @@ class BigBlueButtonConference < WebConference
         returnUrl = "http://#{returnUrl}"
       else
         #For URLs only including the IP address
-        returnUrl = "http://#{returnUrl}/api"
+        returnUrl = "http://#{returnUrl}/bigbluebutton/api"
       end
     end
     "#{returnUrl}/#{action}?#{query_string}"
