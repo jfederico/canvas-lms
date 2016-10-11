@@ -17,6 +17,7 @@
 #
 
 require 'nokogiri'
+require 'json'
 
 class BigBlueButtonConference < WebConference
   include ActionDispatch::Routing::PolymorphicRoutes
@@ -53,7 +54,7 @@ class BigBlueButtonConference < WebConference
       :voiceBridge => "%020d" % self.global_id,
       :attendeePW => settings[:user_key],
       :moderatorPW => settings[:admin_key],
-      :logoutURL => (settings[:default_return_url]+"/conferences/#{self.id}/BBBLogout" || "http://www.instructure.com"),
+      :logoutURL => settings[:default_return_url] ? settings[:default_return_url]+"/conferences/#{self.id}/BBBLogout" : "http://www.instructure.com",
       :record => settings[:record] ? "true" : "false",
       :welcome => settings[:record] ? t("This conference may be recorded.") : ""
     }
@@ -94,7 +95,9 @@ class BigBlueButtonConference < WebConference
       recording_formats = recording.fetch(:playback, {})
       recordingHash = {
         recording_id:       recording[:recordID],
+        recording_vendor:   "big_blue_button",
         published:          recording[:published]=="true" ? true : false,
+        ended_at:           recording[:endTime].to_i,
         duration_minutes:   recording_formats.first[:length].to_i,
         recording_formats:  [],
         images:             []
@@ -114,12 +117,14 @@ class BigBlueButtonConference < WebConference
 
   def delete_all_recordings
     recordings = []
-    fetch_recordings.map{ |recording| recordings<<recording[:recordID] }
-    unless recordings.empty?
+    fetch_recordings.each{ |recording| recordings<<recording[:recordID] }
+    if !recordings.empty? && recordings.length<10
       response = send_request(:deleteRecordings, {
         :recordID => recordings.join(",")
         })
       response[:deleted] if response
+    elsif recordings.length>=10
+      recordings.each { |recording_id| delete_recording(recording_id) }
     end
   end
 
@@ -156,9 +161,7 @@ class BigBlueButtonConference < WebConference
   def retouch?
     # If we've queried the room status recently, use that result to determine if
     # we need to recreate it.
-    if !@conference_active.nil?
-      return !@conference_active
-    end
+    return !@conference_active unless @conference_active.nil?
 
     # BBB removes chat rooms that have been idle fairly quickly.
     # There's no harm in "creating" a room that already exists; the api will
