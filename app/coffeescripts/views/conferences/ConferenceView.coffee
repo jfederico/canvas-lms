@@ -5,8 +5,7 @@ define [
   'jst/conferences/newConference'
   'jquery.google-analytics'
   'compiled/jquery.rails_flash_notifications'
-  'vendor/spin'
-], (I18n, $, {View}, template, Spinner) ->
+], (I18n, $, {View}, template) ->
 
   class ConferenceView extends View
 

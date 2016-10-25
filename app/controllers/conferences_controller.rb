@@ -130,7 +130,6 @@
 #       }
 #     }
 #
-require 'json'
 class ConferencesController < ApplicationController
   include Api::V1::Conferences
 

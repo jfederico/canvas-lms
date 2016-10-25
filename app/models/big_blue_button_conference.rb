@@ -17,7 +17,6 @@
 #
 
 require 'nokogiri'
-require 'json'
 
 class BigBlueButtonConference < WebConference
   include ActionDispatch::Routing::PolymorphicRoutes
