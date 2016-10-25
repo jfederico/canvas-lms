@@ -27,7 +27,7 @@ class BigBlueButtonConference < WebConference
 
   user_setting_field :recording_ready_notifications_enabled, {
     name: ->{ t('recording_setting', 'Notifications') },
-    description: ->{ t('recording_ready_notifications_enabled_description', 'Send notifications when recording is ready') },
+    description: ->{ t('recording_ready_notifications_enabled_description', 'Send notifications when recording is ready.') },
     type: :boolean,
     default: false,
     visible: ->{ WebConference.config(BigBlueButtonConference.to_s)[:recording_ready_notifications_enabled] },
@@ -46,6 +46,7 @@ class BigBlueButtonConference < WebConference
       settings[:admin_key] = 8.times.map{ chars[chars.size * rand] }.join until settings[:admin_key] && settings[:admin_key] != settings[:user_key]
     end
     settings[:record] = config[:recording_enabled]
+    settings[:logoutURL] = settings[:default_return_url]+"/conferences/#{self.id}/BBBLogout"
     current_host = URI(settings[:default_return_url] || "http://www.instructure.com").host
 
     requestBody = {
@@ -54,13 +55,13 @@ class BigBlueButtonConference < WebConference
       :voiceBridge => "%020d" % self.global_id,
       :attendeePW => settings[:user_key],
       :moderatorPW => settings[:admin_key],
-      :logoutURL => settings[:default_return_url] ? settings[:default_return_url]+"/conferences/#{self.id}/BBBLogout" : "http://www.instructure.com",
-      :record => settings[:record] ? "true" : "false",
-      :welcome => settings[:record] ? t("This conference may be recorded.") : ""
+      :logoutURL => settings[:default_return_url] ? settings[:logoutURL] : "http://www.instructure.com",
+      :record => settings[:record].to_s,
+      :welcome => settings[:record] ? t("This conference may be recorded.") : "",
+      :autoStartRecording => config[:force_recording].to_s
     }
 
-    requestBody["meta_canvas-recording-ready-url"] = recording_ready_url(current_host) if config[:recording_ready_notifications_enabled]
-
+    requestBody["meta_canvas-recording-ready-url"] = recording_ready_url(current_host) if settings[:recording_ready_notifications_enabled]
     send_request(:create, requestBody) or return nil
     @conference_active = true
     save
@@ -93,38 +94,39 @@ class BigBlueButtonConference < WebConference
   def recordings
     fetch_recordings.map do |recording|
       recording_formats = recording.fetch(:playback, {})
-      recordingHash = {
+      recordingObj = {
         recording_id:       recording[:recordID],
         recording_vendor:   "big_blue_button",
         published:          recording[:published]=="true" ? true : false,
+        protected:          recording[:protected]=="true" ? true : false,
         ended_at:           recording[:endTime].to_i,
         duration_minutes:   recording_formats.first[:length].to_i,
         recording_formats:  [],
         images:             []
       }
       recording_formats.each do |recording_format|
-        recordingHash[:recording_formats] << {
+        recordingObj[:recording_formats] << {
           type:             recording_format[:type].capitalize,
           playback_url:     recording_format[:url]
         }
-        if recording_format[:preview] && recording_format[:preview][:images] && recording_format[:preview][:images].length > recordingHash[:images].length
-          recordingHash[:images] = recording_format[:preview][:images]
+        if recording_format[:preview] && recording_format[:preview][:images] && recording_format[:preview][:images].length > recordingObj[:images].length
+          recordingObj[:images] = recording_format[:preview][:images]
         end
       end
-      recordingHash
+      recordingObj
     end
   end
 
   def delete_all_recordings
     recordings = []
     fetch_recordings.each{ |recording| recordings<<recording[:recordID] }
-    if !recordings.empty? && recordings.length<10
+    if recordings.length > 1 && recordings.length < 10
       response = send_request(:deleteRecordings, {
         :recordID => recordings.join(",")
         })
       response[:deleted] if response
-    elsif recordings.length>=10
-      recordings.each { |recording_id| delete_recording(recording_id) }
+    elsif recordings.length == 1 || recordings.length >= 10
+      recordings.each{ |recording_id| delete_recording(recording_id) }
     end
   end
 
@@ -135,20 +137,20 @@ class BigBlueButtonConference < WebConference
     response[:deleted] if response
   end
 
-  def publish_recording(recording_id)
+  def publish_recording(recording_id, publish)
     response = send_request(:publishRecordings, {
       :recordID => recording_id,
-      :publish  => "true"
+      :publish  => publish
       })
     response[:published] if response
   end
 
-  def unpublish_recording(recording_id)
-    response = send_request(:publishRecordings, {
+  def protect_recording(recording_id, protect)
+    response = send_request(:updateRecordings, {
       :recordID => recording_id,
-      :publish  => "false"
+      :protect  => protect
       })
-    response[:published] if response
+    response[:updated] if response
   end
 
   def close

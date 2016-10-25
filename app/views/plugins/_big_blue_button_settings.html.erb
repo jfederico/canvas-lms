@@ -6,14 +6,14 @@
       </td>
     </tr>
     <tr>
-      <td><%= f.blabel :domain, :en => "Domain" %></td>
+      <td><%= f.label :domain, :en => "Domain" %></td>
       <td>
         <%= f.text_field :domain %><br>
         <%= mt :domain_description, "**hostname** or **ip address** of your BigBlueButton installation (e.g. bigbluebutton.mycompany.com)" %>
       </td>
     </tr>
     <tr>
-      <td><%= f.blabel :secret, :en => "Secret" %></td>
+      <td><%= f.label :secret, :en => "Secret" %></td>
       <td>
         <%= f.password_field :secret, :autocomplete => false %><br>
         <%= mt :secret_description, "This is the %{parameter_name} parameter that can be found in the %{filename} config file.", :parameter_name => markdown_safe('**beans.dynamicConferenceService.securitySalt**'), :filename => markdown_safe('**bigbluebutton.properties**') %>
@@ -22,13 +22,33 @@
     <tr>
       <td></td>
       <td>
-        <%= f.check_box :recording_enabled %> <%= f.label :recording_enabled, :en => "Allow conferences to be recorded." %>
+        <%= f.check_box :recording_enabled %> <%= f.label :recording_enabled, :en => "Enable recordings" %>
       </td>
     </tr>
     <tr>
       <td></td>
       <td>
-        <%= f.check_box :recording_ready_notifications_enabled %> <%= f.label :recording_ready_notifications_enabled, :en => "Send notifications when recording is ready." %>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <%= f.check_box :force_publish %> <%= f.label :force_publish, :en => "Publish recordings by default." %>
+      </td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <%= f.check_box :force_recording %> <%= f.label :force_recording, :en => "Force creation of recording for all sessions." %>
+      </td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>
+        <%= f.check_box :publish_to_arc %> <%= f.label :publish_to_arc, :en => "Automatically publish recordings to Arc." %>
+      </td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>
+        <%= f.check_box :anonymous_names %> <%= f.label :anonymous_names, :en => "Anonymize names in recordings." %>
       </td>
     </tr>
   </table>

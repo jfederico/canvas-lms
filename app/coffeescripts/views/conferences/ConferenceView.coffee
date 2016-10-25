@@ -25,6 +25,7 @@ define [
       'click .publish_recording_link': 'publish_recording'
       'click .unpublish_recording_link': 'unpublish_recording'
       'click .delete_recording_link': 'delete_recording'
+      'click .protect_recording_link':   'protect_recording_link'
 
     initialize: ->
       super
@@ -60,7 +61,8 @@ define [
     publish_recording: (e) ->
       e.preventDefault()
       $.ajaxJSON($(e.currentTarget).attr('href') + "/publish_recording", "POST", {
-          recording_id: $(e.currentTarget).data("id");
+          recording_id: $(e.currentTarget).data("id"),
+          publish: "true"
         }, (data) =>
           $.flashMessage I18n.t('recordings.publish_success', 'Your "publish recording" request was received. Please check back later to view its new status.')
           $(e.currentTarget).attr('disabled','disabled')
@@ -69,12 +71,13 @@ define [
     unpublish_recording: (e) ->
       e.preventDefault()
       return if !confirm(I18n.t('recordings.confirm.unpublish', "Are you sure you want to unpublish this recording?\n\nNobody will be able to see it."))
-      $.ajaxJSON($(e.currentTarget).attr('href') + "/unpublish_recording", "POST", {
-          recording_id: $(e.currentTarget).data("id");
+      $.ajaxJSON($(e.currentTarget).attr('href') + "/publish_recording", "POST", {
+          recording_id: $(e.currentTarget).data("id"),
+          publish: "false"
         }, (data) =>
           $.flashMessage I18n.t('recordings.unpublish_success', 'Your "unpublish recording" request was received. Please check back later to view its new status.')
           $(e.currentTarget).attr('disabled','disabled')
-          $('a[data-id="' + $(e.currentTarget).data("id") + '"]').removeAttr("href");
+          $('a[data-id="' + $(e.currentTarget).data("id") + '"]').attr("href", "")
           $('a[data-id="' + $(e.currentTarget).data("id") + '"]').children("span").last().remove()
       )
 
@@ -82,7 +85,25 @@ define [
       e.preventDefault()
       return if !confirm(I18n.t('recordings.confirm.delete', "Are you sure you want to delete this recording?\n\nYou will not be able to reopen it."))
       $.ajaxJSON($(e.currentTarget).attr('href') + "/delete_recording", "POST", {
-          recording_id: $(e.currentTarget).data("id");
+          recording_id: $(e.currentTarget).data("id")
+        }, (data) =>
+          window.location.reload(true)
+      )
+
+    protect_recording_link: (e) ->
+      e.preventDefault()
+      $.ajaxJSON($(e.currentTarget).attr('href') + "/protect_recording", "POST", {
+          recording_id: $(e.currentTarget).data("id"),
+          protect: "true"
+        }, (data) =>
+          window.location.reload(true)
+      )
+
+    unprotect_recording_link: (e) ->
+      e.preventDefault()
+      $.ajaxJSON($(e.currentTarget).attr('href') + "/protect_recording", "POST", {
+          recording_id: $(e.currentTarget).data("id"),
+          protect: "false"
         }, (data) =>
           window.location.reload(true)
       )

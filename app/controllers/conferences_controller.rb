@@ -130,6 +130,7 @@
 #       }
 #     }
 #
+require 'json'
 class ConferencesController < ApplicationController
   include Api::V1::Conferences
 
@@ -346,19 +347,7 @@ class ConferencesController < ApplicationController
   def publish_recording
     if authorized_action(@conference, @current_user, :delete)
       @conference.transaction do
-        @conference.publish_recording(params[:recording_id])
-      end
-      respond_to do |format|
-        format.html { redirect_to named_context_url(@context, :context_conferences_url) }
-        format.json { render :json => @conference }
-      end
-    end
-  end
-
-  def unpublish_recording
-    if authorized_action(@conference, @current_user, :delete)
-      @conference.transaction do
-        @conference.unpublish_recording(params[:recording_id])
+        @conference.publish_recording(params[:recording_id], params[:publish])
       end
       respond_to do |format|
         format.html { redirect_to named_context_url(@context, :context_conferences_url) }
@@ -371,6 +360,18 @@ class ConferencesController < ApplicationController
     if authorized_action(@conference, @current_user, :delete)
       @conference.transaction do
         @conference.delete_recording(params[:recording_id])
+      end
+      respond_to do |format|
+        format.html { redirect_to named_context_url(@context, :context_conferences_url) }
+        format.json { render :json => @conference }
+      end
+    end
+  end
+
+  def protect_recording
+    if authorized_action(@conference, @current_user, :delete)
+      @conference.transaction do
+        @conference.protect_recording(params[:recording_id], params[:protect])
       end
       respond_to do |format|
         format.html { redirect_to named_context_url(@context, :context_conferences_url) }

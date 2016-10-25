@@ -7,7 +7,7 @@
             aria-controls="conference-{{id}}"
             aria-expanded="false"
             role="button">
-          <i class="icon-mini-arrow-right"></i>
+          <i class="icon-mini-arrow-right auto_rotate"></i>
           {{title}}
         </a>
       {{else}}
@@ -79,6 +79,13 @@
                   </div>
                   {{#if ../../../permissions.delete}}
                     <div class="ig-button">
+                      <a href="{{../../../../url}}" class="btn btn-small {{#if ../protected}}icon-unlock unprotect_recording_link{{else}}icon-lock protect_recording_link{{/if}}" data-id="{{ recording_id }}">
+                        {{#if protected}}
+                          {{#t 'unprotect'}}Unprotect{{/t}}protect
+                        {{else}}
+                          {{#t 'protect'}}Protect{{/t}}
+                        {{/if}}
+                      </a>
                       <a href="{{../../../../url}}" class="btn btn-small {{#if ../published}}icon-unpublish unpublish_recording_link{{else}}icon-publish publish_recording_link{{/if}}"
                           data-id="{{ recording_id }}">
                           {{#if ../published}}
@@ -93,9 +100,11 @@
                     </div>
                   {{/if}}
                 </div>
-                {{#each images}}
-                  <img src="{{thumbnail_url}}" title="{{title}}" alt="{{title}}" />
-                {{/each}}
+                <div style="padding-top: 10px;">
+                  {{#each images}}
+                    <img src="{{thumbnail_url}}" title="{{title}}" alt="{{title}}" />
+                  {{/each}}
+                </div>
               </div>
             {{/ifEqual}}
           {{else}}
@@ -107,7 +116,7 @@
                       {{title}}
                     </a>
                     {{dateString created_at}}
-                    &#124;&nbsp;
+                    &nbsp;&#124;&nbsp;
                     {{durationToString duration_minutes}}
                   </div>
                 </div>
