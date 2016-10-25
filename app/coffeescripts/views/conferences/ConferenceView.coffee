@@ -24,7 +24,7 @@ define [
       'click .publish_recording_link': 'publish_recording'
       'click .unpublish_recording_link': 'unpublish_recording'
       'click .delete_recording_link': 'delete_recording'
-      'click .protect_recording_link':   'protect_recording_link'
+      'click .protect_recording_link':   'protect_recording'
 
     initialize: ->
       super
@@ -89,7 +89,7 @@ define [
           window.location.reload(true)
       )
 
-    protect_recording_link: (e) ->
+    protect_recording: (e) ->
       e.preventDefault()
       $.ajaxJSON($(e.currentTarget).attr('href') + "/protect_recording", "POST", {
           recording_id: $(e.currentTarget).data("id"),
@@ -98,7 +98,7 @@ define [
           window.location.reload(true)
       )
 
-    unprotect_recording_link: (e) ->
+    unprotect_recording: (e) ->
       e.preventDefault()
       $.ajaxJSON($(e.currentTarget).attr('href') + "/protect_recording", "POST", {
           recording_id: $(e.currentTarget).data("id"),
