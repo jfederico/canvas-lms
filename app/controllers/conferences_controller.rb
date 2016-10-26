@@ -379,7 +379,7 @@ class ConferencesController < ApplicationController
     end
   end
 
-  def BBBLogout
+  def logout
   end
 
   protected
