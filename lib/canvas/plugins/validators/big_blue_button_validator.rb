@@ -28,8 +28,14 @@ module Canvas::Plugins::Validators::BigBlueButtonValidator
       else
         settings.slice!(*expected_settings)
         settings[:recording_enabled] = Canvas::Plugin.value_to_boolean(settings[:recording_enabled])
-        settings[:force_publish] = Canvas::Plugin.value_to_boolean(settings[:force_publish])
-        settings[:force_recording] = Canvas::Plugin.value_to_boolean(settings[:force_recording])
+        if settings[:recording_enabled]
+          settings[:force_publish] = Canvas::Plugin.value_to_boolean(settings[:force_publish])
+          settings[:force_recording] = Canvas::Plugin.value_to_boolean(settings[:force_recording])
+        else
+          settings[:force_publish]=false
+          settings[:force_recording]=false
+        end
+
         settings
       end
     end
