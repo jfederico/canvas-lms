@@ -150,7 +150,7 @@ CanvasRails::Application.routes.draw do
       post :publish_recording
       post :delete_recording
       post :protect_recording
-      get :BBBLogout
+      get :big_blue_button_logout
     end
   end
 

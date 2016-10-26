@@ -379,7 +379,7 @@ class ConferencesController < ApplicationController
     end
   end
 
-  def BBBLogout
+  def big_blue_button_logout
   end
 
   protected

@@ -21,7 +21,7 @@ module Canvas::Plugins::Validators::BigBlueButtonValidator
     if settings.map(&:last).all?(&:blank?)
       {}
     else
-      expected_settings = [:domain, :secret, :recording_enabled, :force_publish, :force_recording, :publish_to_arc, :anonymous_names]
+      expected_settings = [:domain, :secret, :recording_enabled, :force_publish, :force_recording]
       if settings.size != expected_settings.size || settings.map(&:last).any?(&:blank?)
         plugin_setting.errors.add(:base, I18n.t('canvas.plugins.errors.all_fields_required', 'All fields are required'))
         false
@@ -30,8 +30,6 @@ module Canvas::Plugins::Validators::BigBlueButtonValidator
         settings[:recording_enabled] = Canvas::Plugin.value_to_boolean(settings[:recording_enabled])
         settings[:force_publish] = Canvas::Plugin.value_to_boolean(settings[:force_publish])
         settings[:force_recording] = Canvas::Plugin.value_to_boolean(settings[:force_recording])
-        settings[:publish_to_arc] = Canvas::Plugin.value_to_boolean(settings[:publish_to_arc])
-        settings[:anonymous_names] = Canvas::Plugin.value_to_boolean(settings[:anonymous_names])
         settings
       end
     end
