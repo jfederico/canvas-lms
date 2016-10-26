@@ -89,25 +89,77 @@
     <ul>
       {{#each recordings}}
         <li>
-          <div class="ig-row">
-            <div class="ig-row__layout">
-              <div class="ig-info">
-                <div class="ig-details">
-                  <a href="{{playback_url}}" target="_blank" class="ig-title">
-                    {{title}}
-                  </a>
-                  {{dateString created_at}}
-                  &nbsp;&#124;&nbsp;
-                  {{durationToString duration_minutes}}
+          {{#if recording_vendor}}
+            {{#ifEqual recording_vendor "big_blue_button"}}
+              <div class="ig-row" style="text-align: center;">
+                <div class="ig-row__layout">
+                  <div class="ig-info">
+                    <div class="ig-details">
+                      {{#each recording_formats}}
+                        <a href="{{#if ../../published}} {{playback_url}} {{/if}}" target="{{#if ../../published}} _blank {{/if}}"
+                          class="ig-title" data-id="{{../recording_id}}" style="line-height: inherit;">
+                          {{type}}
+                        </a>
+                      {{/each}}
+                      {{dateString ended_at}}
+                      &#124;&nbsp;
+                      {{durationToString duration_minutes}}
+                    </div>
+                  </div>
+                  {{#if ../../../permissions.delete}}
+                    <div class="ig-button">
+                      {{#ifNull ../protected}}
+                      {{else}}
+                        <a href="{{../../../../url}}" class="btn btn-small {{#if ../protected}}icon-unlock unprotect_recording_link{{else}}icon-lock protect_recording_link{{/if}}" data-id="{{ recording_id }}">
+                          {{#ifEqual ../protected true}}
+                            {{#t 'unprotect'}}Unprotect{{/t}}
+                          {{else}}
+                            {{#t 'protect'}}Protect{{/t}}
+                          {{/ifEqual}}
+                        </a>
+                      {{/ifNull}}
+                      <a href="{{../../../../url}}" class="btn btn-small {{#if ../published}}icon-unpublish unpublish_recording_link{{else}}icon-publish publish_recording_link{{/if}}"
+                          data-id="{{ recording_id }}">
+                          {{#if ../published}}
+                            {{#t 'unpublish'}}Unpublish{{/t}}
+                          {{else}}
+                            {{#t 'publish'}}Publish{{/t}}
+                          {{/if}}
+                      </a>
+                      <a href="{{../../../../url}}" class="btn btn-small icon-trash delete_recording_link" data-id="{{ recording_id }}">
+                        {{#t "delete"}}Delete{{/t}}
+                      </a>
+                    </div>
+                  {{/if}}
+                </div>
+                <div style="padding-top: 10px;">
+                  {{#each images}}
+                    <img src="{{thumbnail_url}}" title="{{title}}" alt="{{title}}" />
+                  {{/each}}
                 </div>
               </div>
-              <div class="ig-button">
-                <a class="btn btn-small" target="_blank" href="{{playback_url}}">
-                  {{#t "view"}}View{{/t}}
-                </a>
+            {{/ifEqual}}
+          {{else}}
+            <div class="ig-row">
+              <div class="ig-row__layout">
+                <div class="ig-info">
+                  <div class="ig-details">
+                    <a href="{{playback_url}}" target="_blank" class="ig-title">
+                      {{title}}
+                    </a>
+                    {{dateString created_at}}
+                    &nbsp;&#124;&nbsp;
+                    {{durationToString duration_minutes}}
+                  </div>
+                </div>
+                <div class="ig-button">
+                  <a class="btn btn-small" target="_blank" href="{{playback_url}}">
+                    {{#t "view"}}View{{/t}}
+                  </a>
+                </div>
               </div>
             </div>
-          </div>
+          {{/if}}
         </li>
       {{/each}}
     </ul
