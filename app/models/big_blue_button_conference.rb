@@ -51,8 +51,8 @@ class BigBlueButtonConference < WebConference
       :welcome => settings[:record] ? t("This conference may be recorded.") : ""
     }
     requestBody[:autoStartRecording] = config[:force_recording].to_s if config[:force_recording]
-    requestBody[:meta_autoPublishRecording] = config[:force_publish].to_s if config[:force_publish]
-    requestBody["meta_canvas-recording-ready-url"] = recording_ready_url(current_host)
+    requestBody["meta_bn-auto-publish-recording"] = config[:force_publish].to_s if config[:force_publish]
+    requestBody["meta_bn-recording-ready-url"] = recording_ready_url(current_host)
     send_request(:create, requestBody) or return nil
     @conference_active = true
     save
