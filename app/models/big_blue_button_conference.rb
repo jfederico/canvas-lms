@@ -24,14 +24,6 @@ class BigBlueButtonConference < WebConference
   after_destroy :end_meeting
   after_destroy :delete_all_recordings
 
-  user_setting_field :recording_ready_notifications_enabled, {
-    name: ->{ t('recording_setting', 'Notifications') },
-    description: ->{ t('recording_ready_notifications_enabled_description', 'Send notifications when recording is ready.') },
-    type: :boolean,
-    default: false,
-    visible: ->{ WebConference.config(BigBlueButtonConference.to_s)[:recording_ready_notifications_enabled] },
-  }
-
   def initiate_conference
     return conference_key if conference_key && !retouch?
     unless self.conference_key
@@ -60,7 +52,7 @@ class BigBlueButtonConference < WebConference
       :autoStartRecording => config[:force_recording].to_s
     }
 
-    requestBody["meta_canvas-recording-ready-url"] = recording_ready_url(current_host) if settings[:recording_ready_notifications_enabled]
+    requestBody["meta_canvas-recording-ready-url"] = recording_ready_url(current_host)
     send_request(:create, requestBody) or return nil
     @conference_active = true
     save
