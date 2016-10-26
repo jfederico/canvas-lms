@@ -48,10 +48,10 @@ class BigBlueButtonConference < WebConference
       :moderatorPW => settings[:admin_key],
       :logoutURL => settings[:default_return_url] ? settings[:logoutURL] : "http://www.instructure.com",
       :record => settings[:record].to_s,
-      :welcome => settings[:record] ? t("This conference may be recorded.") : "",
-      :autoStartRecording => config[:force_recording].to_s
+      :welcome => settings[:record] ? t("This conference may be recorded.") : ""
     }
-
+    requestBody[:autoStartRecording] = config[:force_recording].to_s if config[:force_recording]
+    requestBody[:meta_autoPublishRecording] = config[:force_publish].to_s if config[:force_publish]
     requestBody["meta_canvas-recording-ready-url"] = recording_ready_url(current_host)
     send_request(:create, requestBody) or return nil
     @conference_active = true
@@ -89,7 +89,7 @@ class BigBlueButtonConference < WebConference
         recording_id:       recording[:recordID],
         recording_vendor:   "big_blue_button",
         published:          recording[:published]=="true" ? true : false,
-        protected:          recording[:protected]=="true" ? true : false,
+        protected:          recording[:protected] ? recording[:protected]=="true" ? true : false : nil,
         ended_at:           recording[:endTime].to_i,
         duration_minutes:   recording_formats.first[:length].to_i,
         recording_formats:  [],
