@@ -79,13 +79,16 @@
                   </div>
                   {{#if ../../../permissions.delete}}
                     <div class="ig-button">
-                      <a href="{{../../../../url}}" class="btn btn-small {{#if ../protected}}icon-unlock unprotect_recording_link{{else}}icon-lock protect_recording_link{{/if}}" data-id="{{ recording_id }}">
-                        {{#if protected}}
-                          {{#t 'unprotect'}}Unprotect{{/t}}protect
-                        {{else}}
-                          {{#t 'protect'}}Protect{{/t}}
-                        {{/if}}
-                      </a>
+                      {{#ifNull ../protected}}
+                      {{else}}
+                        <a href="{{../../../../url}}" class="btn btn-small {{#if ../protected}}icon-unlock unprotect_recording_link{{else}}icon-lock protect_recording_link{{/if}}" data-id="{{ recording_id }}">
+                          {{#ifEqual ../protected true}}
+                            {{#t 'unprotect'}}Unprotect{{/t}}
+                          {{else}}
+                            {{#t 'protect'}}Protect{{/t}}
+                          {{/ifEqual}}
+                        </a>
+                      {{/ifNull}}
                       <a href="{{../../../../url}}" class="btn btn-small {{#if ../published}}icon-unpublish unpublish_recording_link{{else}}icon-publish publish_recording_link{{/if}}"
                           data-id="{{ recording_id }}">
                           {{#if ../published}}
