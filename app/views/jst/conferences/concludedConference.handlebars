@@ -103,11 +103,13 @@
                     </div>
                   {{/if}}
                 </div>
-                <div style="padding-top: 10px;">
-                  {{#each images}}
-                    <img src="{{thumbnail_url}}" title="{{title}}" alt="{{title}}" />
-                  {{/each}}
-                </div>
+                {{#if ../published}}
+                  <div style="padding-top: 10px;">
+                    {{#each images}}
+                      <img src="{{thumbnail_url}}" title="{{title}}" alt="{{title}}" />
+                    {{/each}}
+                  </div>
+                {{/if}}
               </div>
             {{/ifEqual}}
           {{else}}
