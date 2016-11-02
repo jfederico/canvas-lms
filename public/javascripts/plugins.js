@@ -11,9 +11,5 @@ define([
     $(".disabled_checkbox").change(function() {
       $("#settings .plugin_settings").showIf(!$(this).attr('checked'));
     }).change();
-
-    $(".recordings_enabled_checkbox").change(function() {
-      $("#settings .plugin_settings .recording_feature_options").showIf($(this).attr('checked'));
-    }).change();
   });
 });
