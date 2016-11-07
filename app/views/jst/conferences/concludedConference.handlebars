@@ -104,9 +104,10 @@
                   {{/if}}
                 </div>
                 {{#if ../published}}
-                  <div style="padding-top: 10px;">
+                  <div style="padding-top: 10px;text-align: left;" class="recording_thumbnails">
                     {{#each images}}
-                      <img src="{{thumbnail_url}}" title="{{title}}" alt="{{title}}" />
+                      <img src="{{thumbnail_url}}" title="{{title}}" alt="{{title}}" class="recording-thumbnail" />
+                      <img src="{{thumbnail_url}}" class="large-thumbnail" />
                     {{/each}}
                   </div>
                 {{/if}}
