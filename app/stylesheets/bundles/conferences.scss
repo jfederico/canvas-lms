@@ -82,7 +82,14 @@ header:not(.ic-app-header) {
   border-radius: 3px;
 }
 
-.recording_thumbnails{
+.recording-thumbnails{
+  text-align: left;
+  padding-top: 10px;
+  small{
+    display: block;
+    margin-top: 5px;
+  }
+
   img{
     padding: 4px;
     background-color: white;
