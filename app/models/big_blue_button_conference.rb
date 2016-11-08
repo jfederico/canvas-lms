@@ -24,6 +24,20 @@ class BigBlueButtonConference < WebConference
   after_destroy :end_meeting
   after_destroy :delete_all_recordings
 
+  RECORDING_OPTIONS = {
+    1 => 'Show record option',
+    2 => 'Hide record option (true by default)',
+    3 => 'Record everything'
+  }
+
+  user_setting_field :record, {
+    name: ->{ t('recording_setting', 'Recording') },
+    description: ->{ t('recording_setting_enabled_description', 'Enable recording for this conference') },
+    type: :boolean,
+    default: WebConference.config(BigBlueButtonConference.to_s)[:recording_option_enabled],
+    visible: ->{ WebConference.config(BigBlueButtonConference.to_s)[:recording_options][:text]=='show_record_option' },
+  }
+
   def initiate_conference
     return conference_key if conference_key && !retouch?
     unless self.conference_key
@@ -36,8 +50,7 @@ class BigBlueButtonConference < WebConference
       settings[:user_key] = 8.times.map{ chars[chars.size * rand] }.join
       settings[:admin_key] = 8.times.map{ chars[chars.size * rand] }.join until settings[:admin_key] && settings[:admin_key] != settings[:user_key]
     end
-    settings[:record] = config[:recording_enabled]
-    settings[:logoutURL] = settings[:default_return_url]+"/conferences/#{self.id}/BBBLogout"
+    settings[:logoutURL] = settings[:default_return_url]+"/conferences/#{self.id}/logout"
     current_host = URI(settings[:default_return_url] || "http://www.instructure.com").host
 
     requestBody = {
@@ -47,12 +60,25 @@ class BigBlueButtonConference < WebConference
       :attendeePW => settings[:user_key],
       :moderatorPW => settings[:admin_key],
       :logoutURL => settings[:default_return_url] ? settings[:logoutURL] : "http://www.instructure.com",
-      :record => settings[:record].to_s,
-      :welcome => settings[:record] ? t("This conference may be recorded.") : ""
+      :welcome => config[:recording_enabled] ? t("This conference may be recorded.") : ""
     }
-    requestBody[:autoStartRecording] = config[:force_recording].to_s if config[:force_recording]
-    requestBody["meta_bn-auto-publish-recording"] = config[:force_publish].to_s if config[:force_publish]
     requestBody["meta_bn-recording-ready-url"] = recording_ready_url(current_host)
+
+    if config[:recording_enabled]
+      case config[:recording_options][:text]
+      when 'show_record_option'
+        requestBody[:record] = settings[:record]
+      when 'hide_record_option'
+        requestBody[:record] = true
+      when 'record_everything'
+        requestBody[:record] = true
+        requestBody[:autoStartRecording] = true
+        requestBody[:allowStartStopRecording] = false
+      end
+    else
+      requestBody[:record]=false
+    end
+
     send_request(:create, requestBody) or return nil
     @conference_active = true
     save

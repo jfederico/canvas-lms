@@ -21,19 +21,29 @@ module Canvas::Plugins::Validators::BigBlueButtonValidator
     if settings.map(&:last).all?(&:blank?)
       {}
     else
-      expected_settings = [:domain, :secret, :recording_enabled, :force_publish, :force_recording]
+      expected_settings = [:domain, :secret, :recording_enabled, :recording_options, :recording_option_enabled, :invitations_enabled]
       if settings.size != expected_settings.size || settings.map(&:last).any?(&:blank?)
         plugin_setting.errors.add(:base, I18n.t('canvas.plugins.errors.all_fields_required', 'All fields are required'))
         false
       else
         settings.slice!(*expected_settings)
         settings[:recording_enabled] = Canvas::Plugin.value_to_boolean(settings[:recording_enabled])
+        settings[:invitations_enabled] = Canvas::Plugin.value_to_boolean(settings[:invitations_enabled])
+        settings[:recording_option_enabled] = false
+        recording_options = { :value => settings[:recording_options] }
         if settings[:recording_enabled]
-          settings[:force_publish] = Canvas::Plugin.value_to_boolean(settings[:force_publish])
-          settings[:force_recording] = Canvas::Plugin.value_to_boolean(settings[:force_recording])
+          recording_options[:text]= case settings[:recording_options]
+                                      when '1'
+                                        'show_record_option'
+                                      when '2'
+                                        'hide_record_option'
+                                      when '3'
+                                        'record_everything'
+                                      end
+          settings[:recording_options] = recording_options
+          settings[:recording_option_enabled] = Canvas::Plugin.value_to_boolean(settings[:recording_option_enabled]) if settings[:recording_options][:text]=='show'
         else
-          settings[:force_publish]=false
-          settings[:force_recording]=false
+          settings[:recording_options]='no_record'
         end
 
         settings

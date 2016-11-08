@@ -132,11 +132,18 @@
                     </div>
                   {{/if}}
                 </div>
-                <div style="padding-top: 10px;">
-                  {{#each images}}
-                    <img src="{{thumbnail_url}}" title="{{title}}" alt="{{title}}" />
-                  {{/each}}
-                </div>
+                {{#if ../published}}
+                  <div class="recording-thumbnails">
+                    {{#each images}}
+                      <img src="{{thumbnail_url}}" alt="{{title}}" class="recording-thumbnail" />
+                      <img src="{{thumbnail_url}}" class="large-thumbnail" />
+                    {{/each}}
+                    {{#ifEqual images.length 0}}
+                    {{else}}
+                      <small class="help-text">Hover over an image to view it in full size.</small>
+                    {{/ifEqual}}
+                  </div>
+                {{/if}}
               </div>
             {{/ifEqual}}
           {{else}}
