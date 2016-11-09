@@ -15,7 +15,7 @@ define([
       $("#recording_option_enabled").showIf($(this).attr('checked'));
     }).change();
 
-    $("#recording_option_enabled").showIf($("#recordings_enabled_checkbox").attr('checked'));
+    $("#recording_option_enabled").showIf($("#recordings_enabled_checkbox").attr('checked') && $('#settings_recording_options').val()=='1' );
     displayLegend($('#settings_recording_options'));
 
     $('#settings_recording_options').change(function(){

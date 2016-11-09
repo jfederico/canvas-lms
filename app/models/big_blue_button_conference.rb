@@ -224,16 +224,9 @@ class BigBlueButtonConference < WebConference
     returnUrl.slice!(-1) if returnUrl[-1]=="/"
     unless returnUrl.include?("http://") && returnUrl.include?("/api")
       if returnUrl.include?("http://") && !returnUrl.include?("/api")
-        if returnUrl.include?("/bigbluebutton")
-          #For URLs in the format http://ip/bigbluebutton
-          returnUrl = "#{returnUrl}/api"
-        else
-          #For URLs in the format http://ip
-          returnUrl = "#{returnUrl}/bigbluebutton/api"
-        end
+        returnUrl = returnUrl.include?("/bigbluebutton") ? "#{returnUrl}/api" : "#{returnUrl}/bigbluebutton/api"
       elsif !returnUrl.include?("http://") && returnUrl.include?("/api")
-        #For URLs in the format ip/bigbluebutton/api
-        returnUrl = "http://#{returnUrl}"
+        returnUrl = returnUrl.include?("/bigbluebutton") ? "http://#{returnUrl}" : "http://#{returnUrl}"
       else
         #For URLs only including the IP address
         returnUrl = "http://#{returnUrl}/bigbluebutton/api"
