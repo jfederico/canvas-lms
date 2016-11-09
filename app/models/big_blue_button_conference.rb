@@ -34,8 +34,8 @@ class BigBlueButtonConference < WebConference
     name: ->{ t('recording_setting', 'Recording') },
     description: ->{ t('recording_setting_enabled_description', 'Enable recording for this conference') },
     type: :boolean,
-    default: WebConference.config(BigBlueButtonConference.to_s)[:recording_option_enabled],
-    visible: ->{ WebConference.config(BigBlueButtonConference.to_s)[:recording_options][:text]=='show_record_option' },
+    default: WebConference.config(BigBlueButtonConference.to_s) ? WebConference.config(BigBlueButtonConference.to_s)[:recording_option_enabled] : false,
+    visible: ->{ WebConference.config(BigBlueButtonConference.to_s) ? WebConference.config(BigBlueButtonConference.to_s)[:recording_options][:text]=='show_record_option' : false },
   }
 
   def initiate_conference
@@ -208,7 +208,7 @@ class BigBlueButtonConference < WebConference
   end
 
   def fetch_recordings
-    return [] unless conference_key && settings[:record]
+    return [] unless conference_key && config[:recording_enabled]
     response = send_request(:getRecordings, {
       :meetingID => conference_key,
       })
@@ -224,16 +224,9 @@ class BigBlueButtonConference < WebConference
     returnUrl.slice!(-1) if returnUrl[-1]=="/"
     unless returnUrl.include?("http://") && returnUrl.include?("/api")
       if returnUrl.include?("http://") && !returnUrl.include?("/api")
-        if returnUrl.include?("/bigbluebutton")
-          #For URLs in the format http://ip/bigbluebutton
-          returnUrl = "#{returnUrl}/api"
-        else
-          #For URLs in the format http://ip
-          returnUrl = "#{returnUrl}/bigbluebutton/api"
-        end
+        returnUrl = returnUrl.include?("/bigbluebutton") ? "#{returnUrl}/api" : "#{returnUrl}/bigbluebutton/api"
       elsif !returnUrl.include?("http://") && returnUrl.include?("/api")
-        #For URLs in the format ip/bigbluebutton/api
-        returnUrl = "http://#{returnUrl}"
+        returnUrl = returnUrl.include?("/bigbluebutton") ? "http://#{returnUrl}" : "http://#{returnUrl}"
       else
         #For URLs only including the IP address
         returnUrl = "http://#{returnUrl}/bigbluebutton/api"

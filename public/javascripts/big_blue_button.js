@@ -12,14 +12,15 @@ define([
   $(document).ready(function() {
     $("#recordings_enabled_checkbox").change(function() {
       $("#recording_feature_options").showIf($(this).attr('checked'));
+      $("#recording_option_enabled").showIf($(this).attr('checked'));
     }).change();
 
-    displayRecordOptionCheckbox($('#settings_recording_options').val());
+    $("#recording_option_enabled").showIf($("#recordings_enabled_checkbox").attr('checked') && $('#settings_recording_options').val()=='1' );
     displayLegend($('#settings_recording_options'));
 
     $('#settings_recording_options').change(function(){
       displayLegend(this);
-      displayRecordOptionCheckbox($(this).val());
+      $("#recording_option_enabled").showIf($(this).val()=='1');
     })
   });
 
@@ -46,9 +47,5 @@ define([
     }
 
     $('<small class="help-text" id="recording_option_legend"><br>'+text+'</small>').insertAfter(element)
-  }
-
-  function displayRecordOptionCheckbox(value){
-    value=='1' ? $("#recording_option_enabled").show() : $("#recording_option_enabled").hide()
   }
 });
