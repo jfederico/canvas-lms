@@ -20,7 +20,7 @@ define([
 
     $('#settings_recording_options').change(function(){
       displayLegend(this);
-      displayRecordOptionCheckbox($(this).val());
+      $("#recording_option_enabled").showIf($(this).val()=='1');
     })
   });
 
