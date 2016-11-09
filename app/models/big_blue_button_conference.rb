@@ -208,7 +208,7 @@ class BigBlueButtonConference < WebConference
   end
 
   def fetch_recordings
-    return [] unless conference_key && config[:record]
+    return [] unless conference_key && config[:recording_enabled]
     response = send_request(:getRecordings, {
       :meetingID => conference_key,
       })
