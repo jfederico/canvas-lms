@@ -107,10 +107,10 @@
                     </div>
                   </div>
                   {{#if ../../../permissions.delete}}
-                    <div class="ig-button">
+                    <div class="ig-button" data-id="{{ recording_id }}">
                       {{#ifNull ../protected}}
                       {{else}}
-                        <a href="{{../../../../url}}" class="btn btn-small {{#if ../protected}}icon-unlock unprotect_recording_link{{else}}icon-lock protect_recording_link{{/if}}" data-id="{{ recording_id }}">
+                        <a href="{{../../../../url}}" class="btn btn-small {{#if ../protected}}icon-unlock unprotect_recording_link{{else}}icon-lock protect_recording_link{{/if}}">
                           {{#ifEqual ../protected true}}
                             {{#t 'unprotect'}}Unprotect{{/t}}
                           {{else}}
@@ -118,32 +118,31 @@
                           {{/ifEqual}}
                         </a>
                       {{/ifNull}}
-                      <a href="{{../../../../url}}" class="btn btn-small {{#if ../published}}icon-unpublish unpublish_recording_link{{else}}icon-publish publish_recording_link{{/if}}"
-                          data-id="{{ recording_id }}">
+                      <a href="{{../../../../url}}" class="btn btn-small {{#if ../published}}icon-unpublish unpublish_recording_link{{else}}icon-publish publish_recording_link{{/if}}">
                           {{#if ../published}}
                             {{#t 'unpublish'}}Unpublish{{/t}}
                           {{else}}
                             {{#t 'publish'}}Publish{{/t}}
                           {{/if}}
                       </a>
-                      <a href="{{../../../../url}}" class="btn btn-small icon-trash delete_recording_link" data-id="{{ recording_id }}">
+                      <a href="{{../../../../url}}" class="btn btn-small icon-trash delete_recording_link">
                         {{#t "delete"}}Delete{{/t}}
                       </a>
                     </div>
-                  {{/if}}
-                </div>
-                {{#if ../published}}
-                  <div class="recording-thumbnails">
-                    {{#each images}}
-                      <img src="{{thumbnail_url}}" alt="{{title}}" class="recording-thumbnail" />
-                      <img src="{{thumbnail_url}}" class="large-thumbnail" />
-                    {{/each}}
+                    {{/if}}
+                  </div>
+                  {{#if ../published}}
                     {{#ifEqual images.length 0}}
                     {{else}}
-                      <small class="help-text">Hover over an image to view it in full size.</small>
+                      <div class="recording-thumbnails" data-id="{{ recording_id }}">
+                        {{#each images}}
+                          <img src="{{thumbnail_url}}" alt="{{title}}" class="recording-thumbnail" />
+                          <img src="{{thumbnail_url}}" class="large-thumbnail" />
+                        {{/each}}
+                        <small class="help-text">Hover over an image to view it in full size.</small>
+                      </div>
                     {{/ifEqual}}
-                  </div>
-                {{/if}}
+                  {{/if}}
               </div>
             {{/ifEqual}}
           {{else}}

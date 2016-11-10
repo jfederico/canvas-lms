@@ -76,7 +76,7 @@ class BigBlueButtonConference < WebConference
         requestBody[:allowStartStopRecording] = false
       end
     else
-      requestBody[:record]=false
+      requestBody[:record] = false
     end
 
     send_request(:create, requestBody) or return nil
@@ -135,8 +135,7 @@ class BigBlueButtonConference < WebConference
   end
 
   def delete_all_recordings
-    recordings = []
-    fetch_recordings.each{ |recording| recordings<<recording[:recordID] }
+    recordings = fetch_recordings.map!{ |recording| recording[:recordID] }
     if recordings.length > 1 && recordings.length < 10
       response = send_request(:deleteRecordings, {
         :recordID => recordings.join(",")
@@ -226,7 +225,8 @@ class BigBlueButtonConference < WebConference
       if returnUrl.include?("http://") && !returnUrl.include?("/api")
         returnUrl = returnUrl.include?("/bigbluebutton") ? "#{returnUrl}/api" : "#{returnUrl}/bigbluebutton/api"
       elsif !returnUrl.include?("http://") && returnUrl.include?("/api")
-        returnUrl = returnUrl.include?("/bigbluebutton") ? "http://#{returnUrl}" : "http://#{returnUrl}"
+        #We assume that we have a URL in the type "domain/bigbluebutton/api"
+        returnUrl = "http://#{returnUrl}"
       else
         #For URLs only including the IP address
         returnUrl = "http://#{returnUrl}/bigbluebutton/api"
