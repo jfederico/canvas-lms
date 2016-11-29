@@ -22,14 +22,13 @@ module Canvas::Plugins::Validators::BigBlueButtonValidator
       {}
     else
       expected_settings = [:domain, :secret, :recording_enabled, :recording_options, :recording_option_enabled, :invitations_enabled]
-      if settings.size != expected_settings.size || settings.map(&:last).any?(&:blank?)
+      if settings.size != expected_settings.size || settings[:domain].blank? || (settings[:secret].blank? && plugin_setting[:settings].blank?)
         plugin_setting.errors.add(:base, I18n.t('canvas.plugins.errors.all_fields_required', 'All fields are required'))
         false
       else
         settings.slice!(*expected_settings)
         settings[:recording_enabled] = Canvas::Plugin.value_to_boolean(settings[:recording_enabled])
         settings[:invitations_enabled] = Canvas::Plugin.value_to_boolean(settings[:invitations_enabled])
-        settings[:recording_option_enabled] = false
         recording_options = { :value => settings[:recording_options] }
         if settings[:recording_enabled]
           recording_options[:text]= case settings[:recording_options]
@@ -41,9 +40,9 @@ module Canvas::Plugins::Validators::BigBlueButtonValidator
                                         'record_everything'
                                       end
           settings[:recording_options] = recording_options
-          settings[:recording_option_enabled] = Canvas::Plugin.value_to_boolean(settings[:recording_option_enabled]) if settings[:recording_options][:text]=='show'
+          settings[:recording_option_enabled] = settings[:recording_options][:text]=='show_record_option' ? Canvas::Plugin.value_to_boolean(settings[:recording_option_enabled]) : false
         else
-          settings[:recording_options]='no_record'
+          settings[:recording_options] = { :value => '1', :text => 'show_record_option' }
         end
 
         settings
