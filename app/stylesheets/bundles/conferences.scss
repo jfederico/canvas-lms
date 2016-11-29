@@ -104,7 +104,7 @@ header:not(.ic-app-header) {
     display: inline-block;
   }
 
-  a:hover + .large-thumbnail{
+  img:hover + .large-thumbnail{
     display: inline-block;
     position: absolute;
     z-index: 1;

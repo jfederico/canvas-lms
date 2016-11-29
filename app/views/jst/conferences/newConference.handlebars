@@ -7,7 +7,7 @@
             aria-controls="conference-{{id}}"
             aria-expanded="false"
             role="button">
-          <i class="icon-mini-arrow-right"></i>
+          <i class="icon-mini-arrow-right auto_rotate"></i>
           {{title}}
         </a>
       {{else}}
@@ -130,19 +130,19 @@
                       </a>
                     </div>
                     {{/if}}
-                  </div>
-                  {{#if ../published}}
-                    {{#ifEqual images.length 0}}
-                    {{else}}
-                      <div class="recording-thumbnails" data-id="{{ recording_id }}">
-                        {{#each images}}
-                          <img src="{{thumbnail_url}}" alt="{{title}}" class="recording-thumbnail" />
-                          <img src="{{thumbnail_url}}" class="large-thumbnail" />
-                        {{/each}}
-                        <small class="help-text">Hover over an image to view it in full size.</small>
-                      </div>
-                    {{/ifEqual}}
-                  {{/if}}
+                </div>
+                {{#if ../published}}
+                  {{#ifEqual images.length 0}}
+                  {{else}}
+                    <div class="recording-thumbnails" data-id="{{ recording_id }}">
+                      {{#each images}}
+                        <img src="{{thumbnail_url}}" alt="{{title}}" class="recording-thumbnail" />
+                        <img src="{{thumbnail_url}}" class="large-thumbnail" />
+                      {{/each}}
+                      <small class="help-text">Hover over an image to view it in full size.</small>
+                    </div>
+                  {{/ifEqual}}
+                {{/if}}
               </div>
             {{/ifEqual}}
           {{else}}
@@ -168,6 +168,6 @@
           {{/if}}
         </li>
       {{/each}}
-    </ul
+    </ul>
   </div>
 {{/if}}
