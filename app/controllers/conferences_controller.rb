@@ -143,7 +143,7 @@ class ConferencesController < ApplicationController
   before_filter { |c| c.active_tab = "conferences" }
   before_filter :require_config
   before_filter :reject_student_view_student
-  before_filter :get_conference, :except => [:index, :create]
+  before_filter :get_conference, :except => [:index, :create, :logout]
 
   # @API List conferences
   # Retrieve the list of conferences for this context
