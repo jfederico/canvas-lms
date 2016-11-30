@@ -60,7 +60,7 @@ define [
     publish_recording: (e) ->
       e.preventDefault()
       $.ajaxJSON($(e.currentTarget).attr('href') + "/publish_recording", "POST", {
-          recording_id: $(e.currentTarget).data("id"),
+          recording_id: $(e.currentTarget).parent().data("id"),
           publish: "true"
         }, (data) =>
           $.flashMessage I18n.t('recordings.publish_success', 'Your "publish recording" request was received. Please check back later to view its new status.')
@@ -71,20 +71,21 @@ define [
       e.preventDefault()
       return if !confirm(I18n.t('recordings.confirm.unpublish', "Are you sure you want to unpublish this recording?\n\nNobody will be able to see it."))
       $.ajaxJSON($(e.currentTarget).attr('href') + "/publish_recording", "POST", {
-          recording_id: $(e.currentTarget).data("id"),
+          recording_id: $(e.currentTarget).parent().data("id"),
           publish: "false"
         }, (data) =>
           $.flashMessage I18n.t('recordings.unpublish_success', 'Your "unpublish recording" request was received. Please check back later to view its new status.')
           $(e.currentTarget).attr('disabled','disabled')
-          $('a[data-id="' + $(e.currentTarget).data("id") + '"]').attr("href", "")
-          $('a[data-id="' + $(e.currentTarget).data("id") + '"]').children("span").last().remove()
+          $('a[data-id="' + $(e.currentTarget).parent().data("id") + '"]').attr("href", "")
+          $('a[data-id="' + $(e.currentTarget).parent().data("id") + '"]').children("span").last().remove()
+          $('.recording-thumbnails[data-id="' + $(e.currentTarget).parent().data("id") + '"]').remove()
       )
 
     delete_recording: (e) ->
       e.preventDefault()
       return if !confirm(I18n.t('recordings.confirm.delete', "Are you sure you want to delete this recording?\n\nYou will not be able to reopen it."))
       $.ajaxJSON($(e.currentTarget).attr('href') + "/delete_recording", "POST", {
-          recording_id: $(e.currentTarget).data("id")
+          recording_id: $(e.currentTarget).parent().data("id")
         }, (data) =>
           window.location.reload(true)
       )
@@ -92,7 +93,7 @@ define [
     protect_recording: (e) ->
       e.preventDefault()
       $.ajaxJSON($(e.currentTarget).attr('href') + "/protect_recording", "POST", {
-          recording_id: $(e.currentTarget).data("id"),
+          recording_id: $(e.currentTarget).parent().data("id"),
           protect: "true"
         }, (data) =>
           window.location.reload(true)
@@ -101,7 +102,7 @@ define [
     unprotect_recording: (e) ->
       e.preventDefault()
       $.ajaxJSON($(e.currentTarget).attr('href') + "/protect_recording", "POST", {
-          recording_id: $(e.currentTarget).data("id"),
+          recording_id: $(e.currentTarget).parent().data("id"),
           protect: "false"
         }, (data) =>
           window.location.reload(true)
