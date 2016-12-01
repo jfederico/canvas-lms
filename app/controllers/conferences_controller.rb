@@ -347,11 +347,11 @@ class ConferencesController < ApplicationController
   def publish_recording
     if authorized_action(@conference, @current_user, :delete)
       @conference.transaction do
-        @conference.publish_recording(params[:recording_id], params[:publish])
+        @response = @conference.publish_recording(params[:recording_id], params[:publish])
       end
       respond_to do |format|
         format.html { redirect_to named_context_url(@context, :context_conferences_url) }
-        format.json { render :json => @conference }
+        format.json { render :json => @response }
       end
     end
   end
@@ -371,11 +371,11 @@ class ConferencesController < ApplicationController
   def protect_recording
     if authorized_action(@conference, @current_user, :delete)
       @conference.transaction do
-        @conference.protect_recording(params[:recording_id], params[:protect])
+        @response = @conference.protect_recording(params[:recording_id], params[:protect])
       end
       respond_to do |format|
         format.html { redirect_to named_context_url(@context, :context_conferences_url) }
-        format.json { render :json => @conference }
+        format.json { render :json => @response }
       end
     end
   end

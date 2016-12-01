@@ -59,41 +59,43 @@ define [
 
     publish_recording: (e) ->
       e.preventDefault()
-      $.ajaxJSON($(e.currentTarget).attr('href') + "/publish_recording", "POST", {
-          recording_id: $(e.currentTarget).parent().data("id"),
+      parent = $(e.currentTarget).parent()
+      this.displaySpinner($(e.currentTarget))
+      $.ajaxJSON(parent.data('url') + "/publish_recording", "POST", {
+          recording_id: parent.data("id"),
           publish: "true"
         }, (data) =>
-          $.flashMessage I18n.t('recordings.publish_success', 'Your "publish recording" request was received. Please check back later to view its new status.')
-          $(e.currentTarget).attr('disabled','disabled')
+          this.togglePublishButton(parent, data.published)
+          this.toggleRecordingLink(data, parent)
       )
 
     unpublish_recording: (e) ->
       e.preventDefault()
-      return if !confirm(I18n.t('recordings.confirm.unpublish', "Are you sure you want to unpublish this recording?\n\nNobody will be able to see it."))
-      $.ajaxJSON($(e.currentTarget).attr('href') + "/publish_recording", "POST", {
-          recording_id: $(e.currentTarget).parent().data("id"),
+      parent = $(e.currentTarget).parent()
+      this.displaySpinner($(e.currentTarget))
+      $.ajaxJSON(parent.data('url') + "/publish_recording", "POST", {
+          recording_id: parent.data("id"),
           publish: "false"
         }, (data) =>
-          $.flashMessage I18n.t('recordings.unpublish_success', 'Your "unpublish recording" request was received. Please check back later to view its new status.')
-          $(e.currentTarget).attr('disabled','disabled')
-          $('a[data-id="' + $(e.currentTarget).parent().data("id") + '"]').attr("href", "")
-          $('a[data-id="' + $(e.currentTarget).parent().data("id") + '"]').children("span").last().remove()
-          $('.recording-thumbnails[data-id="' + $(e.currentTarget).parent().data("id") + '"]').remove()
+          this.togglePublishButton(parent, data.published)
+          this.toggleRecordingLink(data, parent)
       )
 
     delete_recording: (e) ->
       e.preventDefault()
+      parent = $(e.currentTarget).parent()
       return if !confirm(I18n.t('recordings.confirm.delete', "Are you sure you want to delete this recording?\n\nYou will not be able to reopen it."))
-      $.ajaxJSON($(e.currentTarget).attr('href') + "/delete_recording", "POST", {
-          recording_id: $(e.currentTarget).parent().data("id")
+      $.ajaxJSON(parent.data('url') + "/delete_recording", "POST", {
+          recording_id: parent.data("id")
         }, (data) =>
           window.location.reload(true)
       )
 
     protect_recording: (e) ->
       e.preventDefault()
-      $.ajaxJSON($(e.currentTarget).attr('href') + "/protect_recording", "POST", {
-          recording_id: $(e.currentTarget).parent().data("id"),
+      parent = $(e.currentTarget).parent()
+      $.ajaxJSON(parent.data('url') + "/protect_recording", "POST", {
+          recording_id: parent.data("id"),
           protect: "true"
         }, (data) =>
           window.location.reload(true)
@@ -101,8 +103,9 @@ define [
 
     unprotect_recording: (e) ->
       e.preventDefault()
-      $.ajaxJSON($(e.currentTarget).attr('href') + "/protect_recording", "POST", {
-          recording_id: $(e.currentTarget).parent().data("id"),
+      parent = $(e.currentTarget).parent()
+      $.ajaxJSON(parent.data('url') + "/protect_recording", "POST", {
+          recording_id: parent.data("id"),
           protect: "false"
         }, (data) =>
           window.location.reload(true)
@@ -164,3 +167,32 @@ define [
         else
           window.open(data[0].url)
       )
+
+    ## FRONT END STUFF
+    displaySpinner: (elem) ->
+      elem.parent().find('img.loader').show()
+      elem.remove()
+
+    togglePublishButton: (parent, published) ->
+      img = parent.find('img.loader')
+      elem =  if published == "true"
+                class: 'btn btn-small icon-unpublish unpublish_recording_link'
+                text: 'Unpublish'
+              else
+                class: 'btn btn-small icon-publish publish_recording_link'
+                text: 'Publish'
+      img.hide()
+      $('<a class="'+elem.class+'">'+I18n.t(elem.text)+'</a>').insertAfter(img)
+
+    toggleRecordingLink: (data, parent) ->
+      thumbnails = $('.recording-thumbnails[data-id="' + parent.data("id") + '"]')
+      link = $('a[data-id="' + parent.data("id") + '"]')
+      ext_icon = link.children("span").last()
+      if data.published == "true"
+        link.attr("href", data.url)
+        ext_icon.show()
+        thumbnails.show()
+      else
+        link.attr("href", "")
+        ext_icon.hide()
+        thumbnails.hide()

@@ -68,7 +68,7 @@
                     <div class="ig-details">
                       {{#each recording_formats}}
                         <a href="{{#if ../../published}} {{playback_url}} {{/if}}" target="{{#if ../../published}} _blank {{/if}}"
-                          class="ig-title" data-id="{{../recording_id}}" style="line-height: inherit;">
+                          class="ig-title" data-id="{{../recording_id}}" style="line-height: inherit;" data-format="{{ type }}">
                           {{type}}
                         </a>
                       {{/each}}
@@ -78,10 +78,10 @@
                     </div>
                   </div>
                   {{#if ../../../permissions.delete}}
-                    <div class="ig-button" data-id="{{ recording_id }}">
+                    <div class="ig-button" data-id="{{ recording_id }}" data-url="{{../../../../url}}">
                       {{#ifNull ../protected}}
                       {{else}}
-                        <a href="{{../../../../url}}" class="btn btn-small {{#if ../protected}}icon-unlock unprotect_recording_link{{else}}icon-lock protect_recording_link{{/if}}">
+                        <a class="btn btn-small {{#if ../protected}}icon-unlock unprotect_recording_link{{else}}icon-lock protect_recording_link{{/if}}">
                           {{#ifEqual ../protected true}}
                             {{#t 'unprotect'}}Unprotect{{/t}}
                           {{else}}
@@ -89,14 +89,15 @@
                           {{/ifEqual}}
                         </a>
                       {{/ifNull}}
-                      <a href="{{../../../../url}}" class="btn btn-small {{#if ../published}}icon-unpublish unpublish_recording_link{{else}}icon-publish publish_recording_link{{/if}}">
+                      <img src="/images/ajax-loader-black-on-white.gif" class="loader" style="display: none;" />
+                      <a class="btn btn-small {{#if ../published}}icon-unpublish unpublish_recording_link{{else}}icon-publish publish_recording_link{{/if}}">
                           {{#if ../published}}
                             {{#t 'unpublish'}}Unpublish{{/t}}
                           {{else}}
                             {{#t 'publish'}}Publish{{/t}}
                           {{/if}}
                       </a>
-                      <a href="{{../../../../url}}" class="btn btn-small icon-trash delete_recording_link">
+                      <a class="btn btn-small icon-trash delete_recording_link">
                         {{#t "delete"}}Delete{{/t}}
                       </a>
                     </div>
