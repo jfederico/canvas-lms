@@ -34,7 +34,7 @@ class BigBlueButtonConference < WebConference
     name: ->{ t('recording_setting', 'Recording') },
     description: ->{ t('recording_setting_enabled_description', 'Enable recording for this conference') },
     type: :boolean,
-    default: WebConference.config(BigBlueButtonConference.to_s) ? WebConference.config(BigBlueButtonConference.to_s)[:recording_option_enabled] : false,
+    default: ->{ WebConference.config(BigBlueButtonConference.to_s) ? WebConference.config(BigBlueButtonConference.to_s)[:recording_option_enabled] : false },
     visible: ->{ WebConference.config(BigBlueButtonConference.to_s) ? WebConference.config(BigBlueButtonConference.to_s)[:recording_options][:text]=='show_record_option' : false },
   }
 
@@ -154,11 +154,21 @@ class BigBlueButtonConference < WebConference
   end
 
   def publish_recording(recording_id, publish)
-    response = send_request(:publishRecordings, {
+    response_publish = send_request(:publishRecordings, {
       :recordID => recording_id,
       :publish  => publish
       })
-    response[:published] if response
+
+    response = { :published => response_publish[:published]}
+
+    if publish=="true" && response_publish[:published]=="true"
+      response_recordings = send_request(:getRecordings, {
+      :recordID => recording_id
+      })
+      response[:url] = response_recordings[:recordings].first[:playback].first[:url]
+    end
+
+    response if response
   end
 
   def protect_recording(recording_id, protect)

@@ -107,28 +107,29 @@
                     </div>
                   </div>
                   {{#if ../../../permissions.delete}}
-                    <div class="ig-button" data-id="{{ recording_id }}">
-                      {{#ifNull ../protected}}
-                      {{else}}
-                        <a href="{{../../../../url}}" class="btn btn-small {{#if ../protected}}icon-unlock unprotect_recording_link{{else}}icon-lock protect_recording_link{{/if}}">
-                          {{#ifEqual ../protected true}}
-                            {{#t 'unprotect'}}Unprotect{{/t}}
+                  <div class="ig-button" data-id="{{ recording_id }}" data-url="{{../../../../url}}">
+                    {{#ifNull ../protected}}
+                    {{else}}
+                      <a class="btn btn-small protect {{#if ../protected}}icon-lock{{else}}icon-unlock{{/if}}" data-protect="{{../protected}}">
+                          {{#if ../protected}}
+                            {{#t 'protected'}}Protected{{/t}}
                           {{else}}
-                            {{#t 'protect'}}Protect{{/t}}
-                          {{/ifEqual}}
-                        </a>
-                      {{/ifNull}}
-                      <a href="{{../../../../url}}" class="btn btn-small {{#if ../published}}icon-unpublish unpublish_recording_link{{else}}icon-publish publish_recording_link{{/if}}">
-                          {{#if ../published}}
-                            {{#t 'unpublish'}}Unpublish{{/t}}
-                          {{else}}
-                            {{#t 'publish'}}Publish{{/t}}
+                            {{#t 'unprotected'}}Unprotected{{/t}}
                           {{/if}}
                       </a>
-                      <a href="{{../../../../url}}" class="btn btn-small icon-trash delete_recording_link">
-                        {{#t "delete"}}Delete{{/t}}
-                      </a>
-                    </div>
+                    {{/ifNull}}
+                    <img src="/images/ajax-loader-black-on-white.gif" class="loader" style="display: none;" />
+                    <a class="btn btn-small publish {{#if ../published}}icon-publish{{else}}icon-unpublish {{/if}}" data-publish="{{../published}}">
+                        {{#if ../published}}
+                          {{#t 'published'}}Published{{/t}}
+                        {{else}}
+                          {{#t 'unpublished'}}Unpublished{{/t}}
+                        {{/if}}
+                    </a>
+                    <a class="btn btn-small icon-trash delete_recording_link">
+                      {{#t "delete"}}Delete{{/t}}
+                    </a>
+                  </div>
                     {{/if}}
                 </div>
                 {{#if ../published}}
