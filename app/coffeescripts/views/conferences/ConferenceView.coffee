@@ -26,10 +26,10 @@ define [
       'click .delete_recording_link': 'delete_recording'
       'click .protect_recording_link':   'protect_recording'
       'click .unprotect_recording_link':   'unprotect_recording'
-      'mouseenter .btn.btn-small.publish' : 'mouse_enter_publish'
-      'mouseleave .btn.btn-small.publish' : 'mouse_leave_publish'
-      'mouseenter .btn.btn-small.protect' : 'mouse_enter_protect'
-      'mouseleave .btn.btn-small.protect' : 'mouse_leave_protect'
+      'mouseenter .btn.btn-small.publish' : 'mouse_enter'
+      'mouseleave .btn.btn-small.publish' : 'mouse_leave'
+      'mouseenter .btn.btn-small.protect' : 'mouse_enter'
+      'mouseleave .btn.btn-small.protect' : 'mouse_leave'
 
     initialize: ->
       super
@@ -172,52 +172,29 @@ define [
           window.location.reload(true)
       )
 
-    mouse_enter_publish: (e) ->
+    mouse_enter: (e) ->
       elem = $(e.currentTarget)
-      if elem.data("publish")
-        elem.removeClass('icon-publish')
-        elem.addClass('icon-unpublish unpublish_recording_link')
-        elem.text('Unpublish')
-      else
-        elem.removeClass('icon-unpublish')
-        elem.addClass('icon-publish publish_recording_link')
-        elem.text('Publish')
+      if elem.data("publish")==true || elem.data("protect")==true
+        elem.removeClass(if elem.data("publish") then 'icon-publish' else 'icon-lock')
+        elem.addClass(if elem.data("publish") then 'icon-unpublish unpublish_recording_link' else 'icon-unlock unprotect_recording_link')
+        elem.text(if elem.data("publish") then 'Unpublish' else 'Unprotect')
+      else if elem.data("publish")==false || elem.data("protect")==false
+        elem.removeClass(if elem.data("publish")==false then 'icon-unpublish' else 'icon-unlock')
+        elem.addClass(if elem.data("publish")==false then 'icon-publish publish_recording_link' else 'icon-lock protect_recording_link')
+        elem.text(if elem.data("publish")==false then 'Publish' else 'Protect')
 
-    mouse_leave_publish: (e) ->
+    mouse_leave: (e) ->
       elem = $(e.currentTarget)
-      if elem.data("publish")
-        elem.removeClass('icon-unpublish unpublish_recording_link')
-        elem.addClass('icon-publish')
-        elem.text('Published')
-      else
-        elem.removeClass('icon-publish publish_recording_link')
-        elem.addClass('icon-unpublish')
-        elem.text('Unpublished')
-
-    mouse_enter_protect: (e) ->
-      elem = $(e.currentTarget)
-      if elem.data("protect")
-        elem.removeClass('icon-lock')
-        elem.addClass('icon-unlock unprotect_recording_link')
-        elem.text('Unprotect')
-      else
-        elem.removeClass('icon-unlock')
-        elem.addClass('icon-lock protect_recording_link')
-        elem.text('Protect')
-
-    mouse_leave_protect: (e) ->
-      elem = $(e.currentTarget)
-      if elem.data("protect")
-        elem.removeClass('icon-unlock unprotect_recording_link')
-        elem.addClass('icon-lock')
-        elem.text('Protected')
-      else
-        elem.removeClass('icon-lock protect_recording_link')
-        elem.addClass('icon-unlock')
-        elem.text('Unprotected')
+      if elem.data("publish")==true || elem.data("protect")==true
+        elem.removeClass(if elem.data("publish") then 'icon-unpublish unpublish_recording_link' else 'icon-unlock unprotect_recording_link')
+        elem.addClass(if elem.data("publish") then 'icon-publish' else 'icon-lock')
+        elem.text(if elem.data("publish") then 'Published' else 'Protected')
+      else if elem.data("publish")==false || elem.data("protect")==false
+        elem.removeClass(if elem.data("publish")==false then 'icon-publish publish_recording_link' else 'icon-lock protect_recording_link')
+        elem.addClass(if elem.data("publish")==false then 'icon-unpublish' else 'icon-unlock')
+        elem.text(if elem.data("publish")==false then 'Unpublished' else 'Unprotected')
 
     ## FRONT END STUFF
-
     displaySpinner: (elem) ->
       elem.parent().find('img.loader').show()
       elem.remove()

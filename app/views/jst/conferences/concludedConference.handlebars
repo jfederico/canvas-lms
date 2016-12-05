@@ -81,7 +81,7 @@
                     <div class="ig-button" data-id="{{ recording_id }}" data-url="{{../../../../url}}">
                       {{#ifNull ../protected}}
                       {{else}}
-                        <a class="btn btn-small protect {{#if ../protected}}icon-lock{{else}}icon-unlock{{/if}}" data-protect="{{../protected}}">
+                        <a class="btn btn-small protect {{#if ../protected}}icon-lock{{else}}icon-unlock{{/if}}" data-protect="{{#if ../protected}}true{{else}}false{{/if}}">
                             {{#if ../protected}}
                               {{#t 'protected'}}Protected{{/t}}
                             {{else}}
@@ -90,7 +90,7 @@
                         </a>
                       {{/ifNull}}
                       <img src="/images/ajax-loader-black-on-white.gif" class="loader" style="display: none;" />
-                      <a class="btn btn-small publish {{#if ../published}}icon-publish{{else}}icon-unpublish {{/if}}" data-publish="{{../published}}">
+                      <a class="btn btn-small publish {{#if ../published}}icon-publish{{else}}icon-unpublish {{/if}}" data-publish="{{#if ../published}}true{{else}}false{{/if}}">
                           {{#if ../published}}
                             {{#t 'published'}}Published{{/t}}
                           {{else}}
