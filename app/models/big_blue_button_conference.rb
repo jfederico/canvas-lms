@@ -21,8 +21,8 @@ require 'nokogiri'
 class BigBlueButtonConference < WebConference
   include ActionDispatch::Routing::PolymorphicRoutes
   include CanvasRails::Application.routes.url_helpers
-  after_destroy :end_meeting
-  after_destroy :delete_all_recordings
+  before_destroy :end_meeting
+  before_destroy :delete_all_recordings
 
   RECORDING_OPTIONS = {
     1 => 'Show record option',
@@ -50,7 +50,6 @@ class BigBlueButtonConference < WebConference
       settings[:user_key] = 8.times.map{ chars[chars.size * rand] }.join
       settings[:admin_key] = 8.times.map{ chars[chars.size * rand] }.join until settings[:admin_key] && settings[:admin_key] != settings[:user_key]
     end
-    settings[:logoutURL] = settings[:default_return_url]+"/conferences/#{self.id}/logout"
     current_host = URI(settings[:default_return_url] || "http://www.instructure.com").host
 
     requestBody = {
@@ -59,7 +58,7 @@ class BigBlueButtonConference < WebConference
       :voiceBridge => "%020d" % self.global_id,
       :attendeePW => settings[:user_key],
       :moderatorPW => settings[:admin_key],
-      :logoutURL => settings[:default_return_url] ? settings[:logoutURL] : "http://www.instructure.com",
+      :logoutURL => settings[:default_return_url] ? "javascript:window.close()" : "http://www.instructure.com",
       :welcome => config[:recording_enabled] ? t("This conference may be recorded.") : ""
     }
     requestBody["meta_bn-recording-ready-url"] = recording_ready_url(current_host)
