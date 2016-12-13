@@ -380,9 +380,6 @@ class ConferencesController < ApplicationController
     end
   end
 
-  def logout
-  end
-
   protected
 
   def require_config
