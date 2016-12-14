@@ -227,7 +227,7 @@ define [
         link.attr("target", "_blank")
         thumbnails.show()
       else
-        link.attr("href", "")
+        link.removeAttr("href")
         link.removeAttr("target")
         i = 0
         while i < link.length
