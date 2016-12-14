@@ -219,7 +219,12 @@ define [
       if data.published == "true"
         i = 0
         while i < link.length
-          $(link[i]).find(".ui-icon.ui-icon-extlink.ui-icon-inline").show()
+          icon = $(link[i]).find(".ui-icon.ui-icon-extlink.ui-icon-inline")
+          if icon.length
+            icon.show()
+          else
+            $(link[i]).addClass('external')
+            $(link[i]).append('<span class="ui-icon ui-icon-extlink ui-icon-inline" title="Links to an external site."></span>')
           for format in data.recording_formats
             if $(link[i]).data('format') == format.type
               $(link[i]).attr("href", format.url)
@@ -227,7 +232,7 @@ define [
         link.attr("target", "_blank")
         thumbnails.show()
       else
-        link.attr("href", "")
+        link.removeAttr("href")
         link.removeAttr("target")
         i = 0
         while i < link.length

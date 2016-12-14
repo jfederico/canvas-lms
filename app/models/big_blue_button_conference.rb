@@ -157,18 +157,25 @@ class BigBlueButtonConference < WebConference
       :recordID => recording_id,
       :publish  => publish
       })
+    response = { :published => "false", :recording_formats => [] }
+    if publish=="true"
+      recording = nil
+      begin
+        response_recordings = send_request(:getRecordings, {
+        :meetingID => conference_key
+        })
+        recording = response_recordings[:recordings].find{ |r| r[:recordID]==recording_id }
+        sleep(10) if recording[:published]=="false"
+      end while recording.nil? || recording[:published]=="false"
 
-    response = { :published => response_publish[:published], :recording_formats => [] }
-
-    if publish=="true" && response_publish[:published]=="true"
-      response_recordings = send_request(:getRecordings, {
-      :meetingID => conference_key
-      })
-      recording = response_recordings[:recordings].find{ |r| r[:recordID]==recording_id }
-      recording[:playback].each{ |formats| response[:recording_formats] << { :type => formats[:type].capitalize, :url => formats[:url] } }
+      if recording[:published]=="true"
+        recording[:playback].each{ |formats| response[:recording_formats] << { :type => formats[:type].capitalize, :url => formats[:url] } }
+        response[:published]="true"
+        response
+      end
+    else
+      response if response
     end
-
-    response if response
   end
 
   def protect_recording(recording_id, protect)
