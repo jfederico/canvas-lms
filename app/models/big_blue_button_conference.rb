@@ -158,13 +158,14 @@ class BigBlueButtonConference < WebConference
       :publish  => publish
       })
 
-    response = { :published => response_publish[:published]}
+    response = { :published => response_publish[:published], :recording_formats => [] }
 
     if publish=="true" && response_publish[:published]=="true"
       response_recordings = send_request(:getRecordings, {
-      :recordID => recording_id
+      :meetingID => conference_key
       })
-      response[:url] = response_recordings[:recordings].first[:playback].first[:url]
+      recording = response_recordings[:recordings].find{ |r| r[:recordID]==recording_id }
+      recording[:playback].each{ |formats| response[:recording_formats] << { :type => formats[:type].capitalize, :url => formats[:url] } }
     end
 
     response if response
