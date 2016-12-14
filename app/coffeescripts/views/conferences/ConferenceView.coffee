@@ -215,12 +215,22 @@ define [
     toggleRecordingLink: (data, parent) ->
       thumbnails = $('.recording-thumbnails[data-id="' + parent.data("id") + '"]')
       link = $('a[data-id="' + parent.data("id") + '"]')
-      ext_icon = link.children("span").last()
+      ext_icon = []
       if data.published == "true"
-        link.attr("href", data.url)
-        ext_icon.show()
+        i = 0
+        while i < link.length
+          $(link[i]).find(".ui-icon.ui-icon-extlink.ui-icon-inline").show()
+          for format in data.recording_formats
+            if $(link[i]).data('format') == format.type
+              $(link[i]).attr("href", format.url)
+          i++
+        link.attr("target", "_blank")
         thumbnails.show()
       else
         link.attr("href", "")
-        ext_icon.hide()
+        link.removeAttr("target")
+        i = 0
+        while i < link.length
+          $(link[i]).find(".ui-icon.ui-icon-extlink.ui-icon-inline").hide()
+          i++
         thumbnails.hide()
