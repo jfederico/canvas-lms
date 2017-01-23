@@ -24,18 +24,22 @@ class BigBlueButtonConference < WebConference
   before_destroy :end_meeting
   before_destroy :delete_all_recordings
 
+  SHOW_RECORDING_OPTION = '1'
+  HIDE_RECORDING_OPTION = '2'
+  RECORD_EVERYTHING = '3'
+
   RECORDING_OPTIONS = {
-    1 => t('settings_show_option','Show record option'),
-    2 => t('settings_hide_option','Hide record option (true by default)'),
-    3 => t('settings_record_everything','Record everything')
+    SHOW_RECORDING_OPTION.to_i => t('settings_show_option','Show record option'),
+    HIDE_RECORDING_OPTION.to_i => t('settings_hide_option','Hide record option (true by default)'),
+    RECORD_EVERYTHING.to_i => t('settings_record_everything','Record everything')
   }
 
   user_setting_field :record, {
     name: ->{ t('recording_setting', 'Recording') },
     description: ->{ t('recording_setting_enabled_description', 'Enable recording for this conference') },
     type: :boolean,
-    default: ->{ WebConference.config(BigBlueButtonConference.to_s) ? WebConference.config(BigBlueButtonConference.to_s)[:recording_option_enabled] : false },
-    visible: ->{ WebConference.config(BigBlueButtonConference.to_s) ? WebConference.config(BigBlueButtonConference.to_s)[:recording_options][:text]=='show_record_option' : false },
+    default: ->{ WebConference.config(BigBlueButtonConference.to_s) && WebConference.config(BigBlueButtonConference.to_s).key?(:recording_option_enabled) ? WebConference.config(BigBlueButtonConference.to_s)[:recording_option_enabled] : false },
+    visible: ->{ WebConference.config(BigBlueButtonConference.to_s) && WebConference.config(BigBlueButtonConference.to_s).key?(:recording_options) ? WebConference.config(BigBlueButtonConference.to_s)[:recording_options]==SHOW_RECORDING_OPTION : false },
   }
 
   def initiate_conference
@@ -64,12 +68,12 @@ class BigBlueButtonConference < WebConference
     requestBody["meta_bn-recording-ready-url"] = recording_ready_url(current_host)
 
     if config[:recording_enabled]
-      case config[:recording_options][:text]
-      when 'show_record_option'
+      case config[:recording_options]
+      when SHOW_RECORDING_OPTION
         requestBody[:record] = settings[:record]
-      when 'hide_record_option'
+      when HIDE_RECORDING_OPTION
         requestBody[:record] = true
-      when 'record_everything'
+      when RECORD_EVERYTHING
         requestBody[:record] = true
         requestBody[:autoStartRecording] = true
         requestBody[:allowStartStopRecording] = false

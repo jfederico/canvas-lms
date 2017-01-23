@@ -28,23 +28,14 @@ module Canvas::Plugins::Validators::BigBlueButtonValidator
       else
         settings.slice!(*expected_settings)
         settings[:recording_enabled] = Canvas::Plugin.value_to_boolean(settings[:recording_enabled])
-        settings[:invitations_enabled] = Canvas::Plugin.value_to_boolean(settings[:invitations_enabled])
-        recording_options = { :value => settings[:recording_options] }
         if settings[:recording_enabled]
-          recording_options[:text]= case settings[:recording_options]
-                                      when '1'
-                                        'show_record_option'
-                                      when '2'
-                                        'hide_record_option'
-                                      when '3'
-                                        'record_everything'
-                                      end
-          settings[:recording_options] = recording_options
-          settings[:recording_option_enabled] = settings[:recording_options][:text]=='show_record_option' ? Canvas::Plugin.value_to_boolean(settings[:recording_option_enabled]) : false
+          settings[:recording_option_enabled] = settings[:recording_options]=='1' ? Canvas::Plugin.value_to_boolean(settings[:recording_option_enabled]) : false
+          settings[:invitations_enabled] = Canvas::Plugin.value_to_boolean(settings[:invitations_enabled])
         else
-          settings[:recording_options] = { :value => '1', :text => 'show_record_option' }
+          settings[:recording_options] = '1'
+          settings[:recording_option_enabled] = false
+          settings[:invitations_enabled] = false
         end
-
         settings
       end
     end
