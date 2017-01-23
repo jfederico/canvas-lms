@@ -217,15 +217,17 @@ class GradebooksController < ApplicationController
 
     tools = external_tools[0...tool_limit]
     tools.push(type: :post_grades) if @context.feature_enabled?(:post_grades)
-    tools.push(type: :ellip) if external_tools.length > tool_limit
     tools
   end
 
   def external_tool_detail(tool)
+    post_grades_placement = tool[:placements][:post_grades]
     {
-      data_url: tool[:placements][:post_grades][:canvas_launch_url],
+      data_url: post_grades_placement[:canvas_launch_url],
       name: tool[:name],
-      type: :lti
+      type: :lti,
+      data_width: post_grades_placement[:launch_width],
+      data_height: post_grades_placement[:launch_height]
     }
   end
 

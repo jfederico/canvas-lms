@@ -501,10 +501,17 @@ END
       display_name: -> { I18n.t('Gradezilla') },
       description: -> { I18n.t('Enable Gradezilla (name is only a placeholder as it will replace Gradebook in the future).') },
       applies_to: "RootAccount",
-      state: "hidden_in_prod",
+      state: "hidden",
       beta: true,
       development: true,
-    }
+    },
+    'modules_home_page' =>
+    {
+      display_name: -> { I18n.t('Modules Home Page') },
+      description: -> { I18n.t('Default to modules for the course home page') },
+      applies_to: "RootAccount",
+      beta: true,
+    },
   )
 
   def self.definitions

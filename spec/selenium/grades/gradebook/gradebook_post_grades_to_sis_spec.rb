@@ -61,6 +61,23 @@ describe "gradebook - post grades to SIS" do
     expect(f('.post-grades-dialog')).to be_displayed
   end
 
+  it 'does not show assignment errors when clicking the post grades button if all ' \
+    'assignments have due dates for each section', priority: '1', test_id: 3036003 do
+    @course.root_account.enable_feature!(:post_grades)
+    @course.update!(sis_source_id: 'xyz')
+    @course.course_sections.each do |section|
+      @attendance_assignment.assignment_overrides.create! do |override|
+        override.set = section
+        override.title = 'section override'
+        override.due_at = Time.zone.now
+        override.due_at_overridden = true
+      end
+    end
+    get "/courses/#{@course.id}/gradebook"
+    f('.post-grades-placeholder > button').click
+    expect(f('.post-grades-dialog')).not_to contain_css('#assignment-errors')
+  end
+
   context 'post grades button' do
     def create_post_grades_tool(opts={})
       course = opts[:course] || @course
@@ -140,16 +157,14 @@ describe "gradebook - post grades to SIS" do
       expect(f('button#post_grades')).to be_displayed
     end
 
-    it "should show as drop down menu with an ellipsis when too many " \
+    it "should show as drop down menu with max number of items when too many " \
       "tools are installed", priority: "1", test_id: 244961 do
       (0...11).each do |i|
         create_post_grades_tool(name: "test tool #{i}")
       end
 
       get "/courses/#{@course.id}/gradebook"
-      expect(ff('li.external-tools-dialog')).to have_size(11)
-      # check for ellipsis (we only display top 10 added tools)
-      expect(ff('li.external-tools-dialog.ellip')).to have_size(1)
+      expect(ff('li.external-tools-dialog')).to have_size(10)
     end
 
     it "should show as drop down menu when powerschool is configured " \
@@ -205,6 +220,82 @@ describe "gradebook - post grades to SIS" do
       expect(f('button#post_grades')).to be_displayed
 
       f('button#post_grades').click
+      f('li.post-grades-placeholder > a').click
+      expect(f('.post-grades-dialog')).to be_displayed
+    end
+  end
+  
+  context "when new_sis_integrations is enabled" do
+    before(:each) do
+      Account.default.set_feature_flag!('new_sis_integrations', 'on')
+    end
+    
+    def create_post_grades_tool(opts={})
+      course = opts[:course] || @course
+      post_grades_tool = course.context_external_tools.create!(
+        name: opts[:name] || 'test tool',
+        domain: 'example.com',
+        url: 'http://example.com/lti',
+        consumer_key: 'key',
+        shared_secret: 'secret',
+        settings: {
+          post_grades: {
+            url: 'http://example.com/lti/post_grades'
+          }
+        }
+      )
+      post_grades_tool
+    end
+
+    it "should show post grades tools in exports dropdown" do
+      (0...10).each do |i|
+        create_post_grades_tool(name: "test tool #{i}")
+      end
+
+      get "/courses/#{@course.id}/gradebook"
+      expect(ff('li.external-tools-dialog')).to have_size(10)
+      move_to_click('button#download_csv')
+      f('li.external-tools-dialog > a').click
+      expect(f('iframe.post-grades-frame')).to be_displayed
+    end
+
+    it "should show max number of items when too many tools are installed" do
+      (0...11).each do |i|
+        create_post_grades_tool(name: "test tool #{i}")
+      end
+
+      get "/courses/#{@course.id}/gradebook"
+      expect(ff('li.external-tools-dialog')).to have_size(10)
+    end
+    
+    it "should include the powerschool option in max number of items " \
+      "in exports dropdown" do
+      (0...11).each do |i|
+        create_post_grades_tool(name: "test tool #{i}")
+      end
+      
+      Account.default.set_feature_flag!('post_grades', 'on')
+      @course.sis_source_id = 'xyz'
+      @course.save
+      @assignment.post_to_sis = true
+      @assignment.save
+
+      get "/courses/#{@course.id}/gradebook"
+      expect(ff('li.external-tools-dialog')).to have_size(9)
+      expect(f('li.post-grades-placeholder > a')).to be_present
+    end
+    
+    it "should show powerschool option in exports dropdown" do
+      Account.default.set_feature_flag!('post_grades', 'on')
+      @course.sis_source_id = 'xyz'
+      @course.save
+      @assignment.post_to_sis = true
+      @assignment.save
+
+      get "/courses/#{@course.id}/gradebook"
+      expect(f('li.post-grades-placeholder > a')).to be_present
+
+      move_to_click('button#download_csv')
       f('li.post-grades-placeholder > a').click
       expect(f('.post-grades-dialog')).to be_displayed
     end

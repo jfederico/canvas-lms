@@ -41,7 +41,7 @@ class Enrollment < ActiveRecord::Base
 
   has_one :enrollment_state, :dependent => :destroy
 
-  has_many :role_overrides, :as => :context
+  has_many :role_overrides, :as => :context, :inverse_of => :context
   has_many :pseudonyms, :primary_key => :user_id, :foreign_key => :user_id
   has_many :course_account_associations, :foreign_key => 'course_id', :primary_key => 'course_id'
   has_many :scores, -> { active }, dependent: :destroy
@@ -601,7 +601,7 @@ class Enrollment < ActiveRecord::Base
     TYPE_RANK_HASHES[order][self.class.to_s]
   end
 
-  STATE_RANK = ['active', ['invited', 'creation_pending'], 'inactive', 'completed', 'rejected', 'deleted']
+  STATE_RANK = ['active', ['invited', 'creation_pending'], 'completed', 'inactive', 'rejected', 'deleted']
   STATE_RANK_HASH = rank_hash(STATE_RANK)
   def self.state_rank_sql
     # don't call rank_sql during class load
@@ -612,7 +612,7 @@ class Enrollment < ActiveRecord::Base
     STATE_RANK_HASH[state.to_s]
   end
 
-  STATE_BY_DATE_RANK = ['active', ['invited', 'creation_pending', 'pending_active', 'pending_invited'], 'inactive', 'completed', 'rejected', 'deleted']
+  STATE_BY_DATE_RANK = ['active', ['invited', 'creation_pending', 'pending_active', 'pending_invited'], 'completed', 'inactive', 'rejected', 'deleted']
   STATE_BY_DATE_RANK_HASH = rank_hash(STATE_BY_DATE_RANK)
   def self.state_by_date_rank_sql
     @state_by_date_rank_sql ||= rank_sql(STATE_BY_DATE_RANK, 'enrollment_states.state').

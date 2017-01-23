@@ -3414,6 +3414,38 @@ describe Assignment do
     end
   end
 
+  describe "due_date" do
+    let(:assignment) do
+      @course.assignments.new(assignment_valid_attributes)
+    end
+
+    it "is valid when due_date_ok? is true" do
+      AssignmentUtil.stubs(:due_date_ok?).returns(true)
+      expect(assignment.valid?).to eq(true)
+    end
+
+    it "is not valid when due_date_ok? is false" do
+      AssignmentUtil.stubs(:due_date_ok?).returns(false)
+      expect(assignment.valid?).to eq(false)
+    end
+  end
+
+  describe "due_date_required?" do
+    let(:assignment) do
+      @course.assignments.create!(assignment_valid_attributes)
+    end
+
+    it "is true when due_date_required? is true" do
+      AssignmentUtil.stubs(:due_date_required?).returns(true)
+      expect(assignment.due_date_required?).to eq(true)
+    end
+
+    it "is false when due_date_required? is false" do
+      AssignmentUtil.stubs(:due_date_required?).returns(false)
+      expect(assignment.due_date_required?).to eq(false)
+    end
+  end
+
   describe "external_tool_tag" do
     it "should update the existing tag when updating the assignment" do
       a = @course.assignments.create!(title: "test",

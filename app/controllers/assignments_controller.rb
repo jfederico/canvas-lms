@@ -388,6 +388,7 @@ class AssignmentsController < ApplicationController
     rce_js_env(:highrisk)
     @assignment ||= @context.assignments.active.find(params[:id])
     if authorized_action(@assignment, @current_user, @assignment.new_record? ? :create : :update)
+      return render_unauthorized_action if !@assignment.new_record? && editing_restricted?(@assignment)
       @assignment.title = params[:title] if params[:title]
       @assignment.due_at = params[:due_at] if params[:due_at]
       @assignment.points_possible = params[:points_possible] if params[:points_possible]
@@ -465,7 +466,10 @@ class AssignmentsController < ApplicationController
         hash[:active_grading_periods] = GradingPeriod.json_for(@context, @current_user)
       end
       append_sis_data(hash)
-      hash[:allow_self_signup] = true if context.is_a?(Course) # for group creation
+      if context.is_a?(Course)
+        hash[:allow_self_signup] = true  # for group creation
+        hash[:group_user_type] = 'student'
+      end
       js_env(hash)
       conditional_release_js_env(@assignment)
       render :edit
@@ -530,6 +534,7 @@ class AssignmentsController < ApplicationController
   def destroy
     @assignment = @context.assignments.active.api_id(params[:id])
     if authorized_action(@assignment, @current_user, :delete)
+      return render_unauthorized_action if editing_restricted?(@assignment)
       @assignment.destroy
 
       respond_to do |format|

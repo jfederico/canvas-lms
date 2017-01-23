@@ -100,6 +100,12 @@ describe AssignmentsApiController, :include_lti_spec_helpers, type: :request do
       expect(json.first).to have_key('in_closed_grading_period')
     end
 
+    it "includes due_date_required in returned json" do
+      @course.assignments.create!(title: "Example Assignment")
+      json = api_get_assignments_index_from_course(@course)
+      expect(json.first).to have_key('due_date_required')
+    end
+
     it "sorts the returned list of assignments" do
       # the API returns the assignments sorted by
       # [assignment_groups.position, assignments.position]
@@ -2526,6 +2532,18 @@ describe AssignmentsApiController, :include_lti_spec_helpers, type: :request do
           @assignment = create_assignment(due_at: 3.days.from_now, only_visible_to_overrides: false)
           call_update({ only_visible_to_overrides: true }, 201)
           expect(@assignment.reload.only_visible_to_overrides).to eql true
+        end
+
+        it "allows disabling post_to_sis when due in a closed grading period" do
+          @assignment = create_assignment(due_at: 3.days.ago, post_to_sis: true)
+          call_update({ post_to_sis: false }, 201)
+          expect(@assignment.reload.post_to_sis).to eq(false)
+        end
+
+        it "allows enabling post_to_sis when due in a closed grading period" do
+          @assignment = create_assignment(due_at: 3.days.ago, post_to_sis: false)
+          call_update({ post_to_sis: true }, 201)
+          expect(@assignment.reload.post_to_sis).to eq(true)
         end
 
         it "does not allow disabling only_visible_to_overrides when due in a closed grading period" do

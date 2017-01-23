@@ -13,6 +13,7 @@ describe "Gradezilla - post grades to SIS" do
   end
 
   before(:each) do
+    Account.default.set_feature_flag!('gradezilla', 'on')
     user_session(@teacher)
   end
 
@@ -62,6 +63,23 @@ describe "Gradezilla - post grades to SIS" do
     expect(f('.post-grades-placeholder > button')).to be_displayed
     f('.post-grades-placeholder > button').click
     expect(f('.post-grades-dialog')).to be_displayed
+  end
+
+  it 'does not show assignment errors when clicking the post grades button if all ' \
+    'assignments have due dates for each section', priority: '1', test_id: 3036003 do
+    @course.root_account.enable_feature!(:post_grades)
+    @course.update!(sis_source_id: 'xyz')
+    @course.course_sections.each do |section|
+      @attendance_assignment.assignment_overrides.create! do |override|
+        override.set = section
+        override.title = 'section override'
+        override.due_at = Time.zone.now
+        override.due_at_overridden = true
+      end
+    end
+    gradezilla_page.visit(@course)
+    f('.post-grades-placeholder > button').click
+    expect(f('.post-grades-dialog')).not_to contain_css('#assignment-errors')
   end
 
   context 'post grades button' do
@@ -143,16 +161,14 @@ describe "Gradezilla - post grades to SIS" do
       expect(f('button#post_grades')).to be_displayed
     end
 
-    it "should show as drop down menu with an ellipsis when too many " \
+    it "should show as drop down menu with max items when too many " \
       "tools are installed", priority: "1", test_id: 244961 do
       (0...11).each do |i|
         create_post_grades_tool(name: "test tool #{i}")
       end
 
       gradezilla_page.visit(@course)
-      expect(ff('li.external-tools-dialog')).to have_size(11)
-      # check for ellipsis (we only display top 10 added tools)
-      expect(ff('li.external-tools-dialog.ellip')).to have_size(1)
+      expect(ff('li.external-tools-dialog')).to have_size(10)
     end
 
     it "should show as drop down menu when powerschool is configured " \

@@ -70,6 +70,7 @@ module Api::V1::Assignment
     allowed_extensions
     due_at
     only_visible_to_overrides
+    post_to_sis
   ].freeze
 
   def assignments_json(assignments, user, session, opts = {})
@@ -117,6 +118,7 @@ module Api::V1::Assignment
     hash['name'] = assignment.title
     hash['submission_types'] = assignment.submission_types_array
     hash['has_submitted_submissions'] = assignment.has_submitted_submissions?
+    hash['due_date_required'] = assignment.due_date_required?
 
     unless opts[:exclude_response_fields].include?('in_closed_grading_period')
       hash['in_closed_grading_period'] = assignment.in_closed_grading_period?
@@ -301,6 +303,11 @@ module Api::V1::Assignment
     if assignment.context.present?
       hash['submissions_download_url'] = submissions_download_url(assignment.context, assignment)
     end
+
+    if opts[:include_master_course_restrictions]
+      hash.merge!(assignment.master_course_api_restriction_data)
+    end
+
     hash
   end
 

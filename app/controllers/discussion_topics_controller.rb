@@ -372,11 +372,16 @@ class DiscussionTopicsController < ApplicationController
         end
       end
       format.json do
+        check_for_restrictions = master_courses? && @context.grants_right?(@current_user, session, :moderate_forum)
+        MasterCourses::Restrictor.preload_restrictions(@topics) if check_for_restrictions
+
         render json: discussion_topics_api_json(@topics, @context, @current_user, session,
           user_can_moderate: user_can_moderate,
           plain_messages: value_to_boolean(params[:plain_messages]),
           exclude_assignment_description: value_to_boolean(params[:exclude_assignment_descriptions]),
-          include_all_dates: include_params.include?('all_dates'))
+          include_all_dates: include_params.include?('all_dates'),
+          include_master_course_restrictions: check_for_restrictions
+        )
       end
     end
   end
@@ -398,6 +403,7 @@ class DiscussionTopicsController < ApplicationController
   def edit
     @topic ||= @context.all_discussion_topics.find(params[:id])
     if authorized_action(@topic, @current_user, (@topic.new_record? ? :create : :update))
+      return render_unauthorized_action if !@topic.new_record? && editing_restricted?(@topic)
       hash =  {
         URL_ROOT: named_context_url(@context, :api_v1_context_discussion_topics_url),
         PERMISSIONS: {
@@ -468,7 +474,10 @@ class DiscussionTopicsController < ApplicationController
         gp_context = @context.is_a?(Group) ? @context.context : @context
         js_hash[:active_grading_periods] = GradingPeriod.json_for(gp_context, @current_user)
       end
-      js_hash[:allow_self_signup] = true if context.is_a?(Course) # for group creation
+      if context.is_a?(Course)
+        js_hash[:allow_self_signup] = true  # for group creation
+        js_hash[:group_user_type] = 'student'
+      end
       js_env(js_hash)
 
       conditional_release_js_env(@topic.assignment)
@@ -802,6 +811,7 @@ class DiscussionTopicsController < ApplicationController
   def destroy
     @topic = @context.all_discussion_topics.find(params[:id] || params[:topic_id])
     if authorized_action(@topic, @current_user, :delete)
+      return render_unauthorized_action if editing_restricted?(@topic)
       @topic.destroy
       respond_to do |format|
         format.html {

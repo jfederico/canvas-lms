@@ -749,11 +749,17 @@ describe Attachment do
       tag2 = mod.add_item(:id => @a2.id, :type => 'attachment')
       mod.save!
 
+      @a1.reload
+      expect(@a1.could_be_locked).to be_truthy
+
       @a.display_name = 'a1'
       @a.handle_duplicates(:overwrite)
       tag1.reload
       expect(tag1).to be_active
       expect(tag1.content_id).to eq @a.id
+
+      @a.reload
+      expect(@a.could_be_locked).to be_truthy
 
       @a2.destroy
       tag2.reload
@@ -1029,8 +1035,8 @@ describe Attachment do
     end
 
     it "should rename root attachments and update children" do
-      @new_object.expects(:exists?).returns(false)
-      @old_object.expects(:copy_to).with(@root.full_filename.sub(@old_account.id.to_s, @new_account.id.to_s), anything)
+      expect(@new_object).to receive(:exists?).and_return(false)
+      expect(@old_object).to receive(:copy_to).with(@root.full_filename.sub(@old_account.id.to_s, @new_account.id.to_s), anything)
       @root.change_namespace(@new_account.file_namespace)
       expect(@root.namespace).to eq @new_account.file_namespace
       expect(@child.reload.namespace).to eq @root.namespace
@@ -1103,7 +1109,9 @@ describe Attachment do
       thumb = @attachment.thumbnails.where(thumbnail: "640x>").first
       expect(thumb).to eq nil
 
-      @attachment.expects(:create_or_update_thumbnail).with(anything, sz, sz).returns { @attachment.thumbnails.create!(:thumbnail => "640x>", :uploaded_data => stub_png_data) }
+      expect(@attachment).to receive(:create_or_update_thumbnail).with(anything, sz, sz) { 
+        @attachment.thumbnails.create!(:thumbnail => "640x>", :uploaded_data => stub_png_data)
+      }
       url = @attachment.thumbnail_url(:size => "640x>")
       expect(url).to be_present
       thumb = @attachment.thumbnails.where(thumbnail: "640x>").first
@@ -1112,9 +1120,11 @@ describe Attachment do
     end
 
     it "should use the existing thumbnail if present" do
-      @attachment.expects(:create_or_update_thumbnail).with(anything, sz, sz).returns { @attachment.thumbnails.create!(:thumbnail => "640x>", :uploaded_data => stub_png_data) }
+      expect(@attachment).to receive(:create_or_update_thumbnail).with(anything, sz, sz) {
+        @attachment.thumbnails.create!(:thumbnail => "640x>", :uploaded_data => stub_png_data)
+      }
       url = @attachment.thumbnail_url(:size => "640x>")
-      @attachment.expects(:create_dynamic_thumbnail).never
+      expect(@attachment).to receive(:create_dynamic_thumbnail).never
       url = @attachment.thumbnail_url(:size => "640x>")
       thumb = @attachment.thumbnails.where(thumbnail: "640x>").first
       expect(url).to be_present
