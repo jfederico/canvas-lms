@@ -3,9 +3,10 @@ define [
   'jquery'
   'Backbone'
   'jst/conferences/newConference'
+  'str/htmlEscape'
   'jquery.google-analytics'
   'compiled/jquery.rails_flash_notifications'
-], (I18n, $, {View}, template) ->
+], (I18n, $, {View}, template, htmlEscape) ->
 
   class ConferenceView extends View
 
@@ -181,22 +182,22 @@ define [
       if elem.data("publish")==true || elem.data("protect")==true
         elem.removeClass(if elem.data("publish") then 'icon-publish' else 'icon-lock')
         elem.addClass(if elem.data("publish") then 'icon-unpublish unpublish_recording_link' else 'icon-unlock unprotect_recording_link')
-        elem.text(if elem.data("publish") then 'Unpublish' else 'Unprotect')
+        elem.text(if elem.data("publish") then I18n.t('conferences.recordings.unpublish', 'Unpublish') else I18n.t('conferences.recordings.ubprotect', 'Unprotect'))
       else if elem.data("publish")==false || elem.data("protect")==false
         elem.removeClass(if elem.data("publish")==false then 'icon-unpublish' else 'icon-unlock')
         elem.addClass(if elem.data("publish")==false then 'icon-publish publish_recording_link' else 'icon-lock protect_recording_link')
-        elem.text(if elem.data("publish")==false then 'Publish' else 'Protect')
+        elem.text(if elem.data("publish")==false then I18n.t('conferences.recordings.publish', 'Publish') else I18n.t('conferences.recordings.protect', 'Protect'))
 
     mouse_leave: (e) ->
       elem = $(e.currentTarget)
       if elem.data("publish")==true || elem.data("protect")==true
         elem.removeClass(if elem.data("publish") then 'icon-unpublish unpublish_recording_link' else 'icon-unlock unprotect_recording_link')
         elem.addClass(if elem.data("publish") then 'icon-publish' else 'icon-lock')
-        elem.text(if elem.data("publish") then 'Published' else 'Protected')
+        elem.text(if elem.data("publish") then I18n.t('conferences.recordings.published', 'Published') else I18n.t('conferences.recordings.protected', 'Protected'))
       else if elem.data("publish")==false || elem.data("protect")==false
         elem.removeClass(if elem.data("publish")==false then 'icon-publish publish_recording_link' else 'icon-lock protect_recording_link')
         elem.addClass(if elem.data("publish")==false then 'icon-unpublish' else 'icon-unlock')
-        elem.text(if elem.data("publish")==false then 'Unpublished' else 'Unprotected')
+        elem.text(if elem.data("publish")==false then I18n.t('conferences.recordings.unpublished', 'Unpublished') else I18n.t('conferences.recordings.ubprotected', 'Unprotected'))
 
     ## BBB FRONT END FUNCTIONS FOR PUBLISH, PROTECT AND DELETE RECORDINGS
     displaySpinner: (elem, publish, protect) ->
@@ -206,26 +207,26 @@ define [
     togglePublishOrProtectButton: (parent, publish, protect) ->
       spinner = parent.find('img.loader[data-action="'+ if publish then 'publish' else if protect then 'protect' else '' +'"]')
       elem =  if publish == "true"
-                class: 'btn btn-small publish icon-publish'
+                classHtml: 'btn btn-small publish icon-publish'
                 text: I18n.t('conferences.recordings.published', 'Published')
-                publish: 'true'
+                dataHtml: 'true'
               else if publish == "false"
-                class: 'btn btn-small publish icon-unpublish'
+                classHtml: 'btn btn-small publish icon-unpublish'
                 text: I18n.t('conferences.recordings.unpublished', 'Unpublished')
-                publish: 'false'
+                dataHtml: 'false'
               else if protect=="true"
-                class: 'btn btn-small protect icon-lock'
+                classHtml: 'btn btn-small protect icon-lock'
                 text: I18n.t('conferences.recordings.protected', 'Protected')
-                protect: 'true'
+                dataHtml: 'true'
               else if protect=="false"
-                class: 'btn btn-small protect icon-unlock'
+                classHtml: 'btn btn-small protect icon-unlock'
                 text: I18n.t('conferences.recordings.unprotected', 'Unprotected')
-                protect: 'false'
+                dataHtml: 'false'
       spinner.hide()
       if publish
-        $('<a class="'+elem.class+'" data-publish="'+elem.publish+'">'+elem.text+'</a>').insertAfter(spinner)
+        $('<a class="' + elem.classHtml + '" data-publish="' + elem.dataHtml + '">' + htmlEscape(elem.text) + '</a>').insertAfter(spinner)
       else if protect
-        $('<a class="'+elem.class+'" data-protect="'+elem.protect+'">'+elem.text+'</a>').insertAfter(spinner)
+        $('<a class="' + elem.classHtml + '" data-protect="' + elem.dataHtml + '">' + htmlEscape(elem.text) + '</a>').insertAfter(spinner)
 
     toggleRecordingLink: (data, parent) ->
       thumbnails = $('.recording-thumbnails[data-id="' + parent.data("id") + '"]')
