@@ -119,6 +119,7 @@ define [
         else
           window.open(data[0].url)
       )
+
     publish_recording: (e) ->
       e.preventDefault()
       parent = $(e.currentTarget).parent()
@@ -127,7 +128,7 @@ define [
           recording_id: parent.data("id"),
           publish: "true"
         }, (data) =>
-          this.togglePublishOrProtectButton(parent, data.published, null)
+          this.togglePublishOrProtectButton(parent, 'publish', data.published)
           this.toggleRecordingLink(data, parent)
       )
 
@@ -139,7 +140,7 @@ define [
           recording_id: parent.data("id"),
           publish: "false"
         }, (data) =>
-          this.togglePublishOrProtectButton(parent, data.published, null)
+          this.togglePublishOrProtectButton(parent, 'publish', data.published)
           this.toggleRecordingLink(data, parent)
       )
 
@@ -161,7 +162,7 @@ define [
           recording_id: parent.data("id"),
           protect: "true"
         }, (data) =>
-          this.togglePublishOrProtectButton(parent, null, data.protected)
+          this.togglePublishOrProtectButton(parent, 'protect', data.protected)
           this.toggleRecordingLink(data, parent)
       )
 
@@ -173,7 +174,7 @@ define [
           recording_id: parent.data("id"),
           protect: "false"
         }, (data) =>
-          this.togglePublishOrProtectButton(parent, null, data.protected)
+          this.togglePublishOrProtectButton(parent, 'protect', data.protected)
           this.toggleRecordingLink(data, parent)
       )
 
@@ -204,29 +205,27 @@ define [
       elem.prev('img.loader').show()
       elem.remove()
 
-    togglePublishOrProtectButton: (parent, publish, protect) ->
-      spinner = parent.find('img.loader[data-action="'+ if publish then 'publish' else if protect then 'protect' else '' +'"]')
-      elem =  if publish == "true"
-                classHtml: 'btn btn-small publish icon-publish'
+    togglePublishOrProtectButton: (parent, action, data) ->
+      attribute = dataHtml: 'data-' + action
+      spinner = parent.find('img.loader[data-action="' + action + '"]')
+      elem =  if action == 'publish' && data == "true"
+                classHtml: 'btn btn-small ' + action + ' icon-publish'
                 text: I18n.t('conferences.recordings.published', 'Published')
-                dataHtml: 'true'
-              else if publish == "false"
-                classHtml: 'btn btn-small publish icon-unpublish'
+              else if action == 'publish' && data == "false"
+                classHtml: 'btn btn-small ' + action + ' icon-unpublish'
                 text: I18n.t('conferences.recordings.unpublished', 'Unpublished')
-                dataHtml: 'false'
-              else if protect=="true"
-                classHtml: 'btn btn-small protect icon-lock'
+                dataHtml: data
+              else if action == 'protect' && data=="true"
+                classHtml: 'btn btn-small ' + action + ' icon-lock'
                 text: I18n.t('conferences.recordings.protected', 'Protected')
-                dataHtml: 'true'
-              else if protect=="false"
-                classHtml: 'btn btn-small protect icon-unlock'
+                dataHtml: data
+              else if action == 'protect' && data=="false"
+                classHtml: 'btn btn-small ' + action + ' icon-unlock'
                 text: I18n.t('conferences.recordings.unprotected', 'Unprotected')
-                dataHtml: 'false'
+                dataHtml: data
+
       spinner.hide()
-      if publish
-        $('<a class="' + elem.classHtml + '" data-publish="' + elem.dataHtml + '">' + htmlEscape(elem.text) + '</a>').insertAfter(spinner)
-      else if protect
-        $('<a class="' + elem.classHtml + '" data-protect="' + elem.dataHtml + '">' + htmlEscape(elem.text) + '</a>').insertAfter(spinner)
+      $('<a class="' + elem.classHtml + '" ' + attribute.dataHtml + '="' + elem.dataHtml + '">' + htmlEscape(elem.text) + '</a>').insertAfter(spinner)
 
     toggleRecordingLink: (data, parent) ->
       thumbnails = $('.recording-thumbnails[data-id="' + parent.data("id") + '"]')
