@@ -139,13 +139,13 @@ class BigBlueButtonConference < WebConference
 
   def delete_all_recordings
     recordings = fetch_recordings.map!{ |recording| recording[:recordID] }
-    if recordings.length > 1 && recordings.length < 10
-      response = send_request(:deleteRecordings, {
-        :recordID => recordings.join(",")
-        })
-      response[:deleted] if response
-    elsif recordings.length == 1 || recordings.length >= 10
-      recordings.each{ |recording_id| delete_recording(recording_id) }
+    if recordings.length > 0
+      page_size = 25
+      for page in 0..(recordings.length / page_size + 1)
+        offset = page * page_size
+        recs = recordings[(offset)..(offset + page_size)]
+        delete_recording(recs.join(","))
+      end
     end
   end
 
@@ -161,25 +161,8 @@ class BigBlueButtonConference < WebConference
       :recordID => recording_id,
       :publish  => publish
       })
-    response = { :published => "false", :recording_formats => [] }
-    if publish=="true"
-      recording = nil
-      begin
-        response_recordings = send_request(:getRecordings, {
-        :meetingID => conference_key
-        })
-        recording = response_recordings[:recordings].find{ |r| r[:recordID]==recording_id }
-        sleep(10) if recording[:published]=="false"
-      end while recording.nil? || recording[:published]=="false"
 
-      if recording[:published]=="true"
-        recording[:playback].each{ |formats| response[:recording_formats] << { :type => formats[:type].capitalize, :url => formats[:url] } }
-        response[:published]="true"
-        response
-      end
-    else
-      response if response
-    end
+    get_recordings(recording_id)
   end
 
   def protect_recording(recording_id, protect)
@@ -188,11 +171,15 @@ class BigBlueButtonConference < WebConference
       :protect  => protect
       })
 
+    get_recordings(recording_id)
+  end
+
+  def get_recordings(recording_id)
     response_recordings = send_request(:getRecordings, {
-    :meetingID => conference_key
-    })
+      :meetingID => conference_key
+      })
     recording = response_recordings[:recordings].find{ |r| r[:recordID]==recording_id }
-    response = { :protected=> recording[:protected], :recording_formats => [] }
+    response = { :published => recording[:published], :protected => recording[:protected], :recording_formats => [] }
     recording[:playback].each{ |formats| response[:recording_formats] << { :type => formats[:type].capitalize, :url => formats[:url] } }
     response if response
   end
