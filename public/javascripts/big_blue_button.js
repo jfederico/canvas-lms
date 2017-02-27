@@ -3,11 +3,6 @@ define([
   'jquery' /* $ */,
   'jquery.instructure_misc_plugins' /* showIf */
 ], function(I18n, $) {
-  var LEGEND_DEFAULT="Instructor can use Start/Stop Record button in sessions configured for recording."
-
-  var LEGEND_ALL="Instructor can use Start/Stop Record button in all sessions."
-
-  var LEGEND_HIDE="Hide Start/Stop Record button. Record all content shared in every session."
 
   $(document).ready(function() {
     $("#recordings_enabled_checkbox").change(function() {
@@ -24,28 +19,28 @@ define([
     })
   });
 
-  function displayLegend(element){
+  function displayLegend(element) {
     var option = $(element).val();
     var text;
 
     switch(option){
       case '1':
-        text=LEGEND_DEFAULT
+        text = I18n.t("conferences.bigbluebutton.legend_default", "Instructor can use Start/Stop Record button in sessions configured for recording.");
         break;
       case '2':
-        text=LEGEND_ALL
+        text = I18n.t("conferences.bigbluebutton.legend_all", "Instructor can use Start/Stop Record button in all sessions.");
         break;
       case '3':
-        text=LEGEND_HIDE
+        text = I18n.t("conferences.bigbluebutton.legend_hide", "Hide Start/Stop Record button. Record all content shared in every session.");
         break;
       default:
-        text=""
+        text = "";
     }
 
-    if($(document).has('#recording_option_legend').length>0){
+    if ($(document).has('#recording_option_legend').length > 0) {
       $(document).find('#recording_option_legend').remove();
     }
 
-    $('<small class="help-text" id="recording_option_legend"><br>'+text+'</small>').insertAfter(element)
+    $('<small class="help-text" id="recording_option_legend"><br>' + htmlEscape(text) + '</small>').insertAfter(element);
   }
 });
