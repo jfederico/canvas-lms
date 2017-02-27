@@ -10,8 +10,10 @@ define [
   'compiled/collections/DateGroupCollection'
   'i18n!assignments'
   'jsx/grading/helpers/GradingPeriodsHelper'
-  'timezone'
-], ($, _, {Model}, DefaultUrlMixin, TurnitinSettings, VeriCiteSettings, DateGroup, AssignmentOverrideCollection, DateGroupCollection, I18n, GradingPeriodsHelper, tz) ->
+  'timezone',
+  'jsx/shared/helpers/numberHelper'
+], ($, _, {Model}, DefaultUrlMixin, TurnitinSettings, VeriCiteSettings, DateGroup, AssignmentOverrideCollection,
+    DateGroupCollection, I18n, GradingPeriodsHelper, tz, numberHelper) ->
 
   isAdmin = () ->
     _.contains(ENV.current_user_roles, 'admin')
@@ -84,7 +86,12 @@ define [
 
     pointsPossible: (points) =>
       return @get('points_possible') || 0 unless arguments.length > 0
-      @set 'points_possible', points
+      # if the incoming value is valid, set the field to the numeric value
+      # if not, set to the incoming string and let validation handle it later
+      if(numberHelper.validate(points))
+        @set 'points_possible', numberHelper.parse(points)
+      else
+        @set 'points_possible', points
 
     secureParams: =>
       @get('secure_params')
@@ -94,7 +101,7 @@ define [
       @set 'assignment_group_id', assignment_group_id
 
     canFreeze: =>
-      @get('frozen_attributes')? && !@frozen()
+      @get('frozen_attributes')? && !@frozen() && !@isQuizLTIAssignment()
 
     canDelete: =>
       not @inClosedGradingPeriod() and not @frozen()
@@ -306,6 +313,9 @@ define [
     postToSISEnabled: =>
       return ENV.POST_TO_SIS
 
+    postToSISName: =>
+      return ENV.SIS_NAME
+
     defaultDates: =>
       group = new DateGroup
         due_at:    @get("due_at")
@@ -351,6 +361,9 @@ define [
     is_quiz_assignment: =>
       @get('is_quiz_assignment')
 
+    isQuizLTIAssignment: =>
+      @get('is_quiz_lti_assignment')
+
     toView: =>
       fields = [
         'name', 'dueAt', 'description', 'pointsPossible', 'lockAt', 'unlockAt',
@@ -368,8 +381,8 @@ define [
         'labelId', 'position', 'postToSIS', 'multipleDueDates', 'nonBaseDates',
         'allDates', 'hasDueDate', 'hasPointsPossible', 'singleSectionDueDate',
         'moderatedGrading', 'postToSISEnabled', 'isOnlyVisibleToOverrides',
-        'omitFromFinalGrade', 'is_quiz_assignment', 'secureParams',
-        'inClosedGradingPeriod', 'dueDateRequired'
+        'omitFromFinalGrade', 'is_quiz_assignment', 'isQuizLTIAssignment',
+        'secureParams', 'inClosedGradingPeriod', 'dueDateRequired'
       ]
 
       hash =

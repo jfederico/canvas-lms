@@ -14,9 +14,21 @@ define [
   'helpers/fakeENV'
   'jsx/shared/rce/RichContentEditor'
   'helpers/jquery.simulate'
-], ($, _, SectionCollection, Assignment, DueDateList, Section, DiscussionTopic,
-Announcement, DueDateOverrideView, EditView, AssignmentGroupCollection,
-GroupCategorySelector, fakeENV, RichContentEditor) ->
+], (
+  $,
+  _,
+  SectionCollection,
+  Assignment,
+  DueDateList,
+  Section,
+  DiscussionTopic,
+  Announcement,
+  DueDateOverrideView,
+  EditView,
+  AssignmentGroupCollection,
+  GroupCategorySelector,
+  fakeENV,
+  RichContentEditor) ->
 
   editView = (opts = {}, discussOpts = {}) ->
     modelClass = if opts.isAnnouncement then Announcement else DiscussionTopic
@@ -42,7 +54,17 @@ GroupCategorySelector, fakeENV, RichContentEditor) ->
     (app.assignmentGroupCollection = new AssignmentGroupCollection).contextAssetString = ENV.context_asset_string
     app.render()
 
-  module 'EditView',
+  nameLengthHelper = (view, length, maxNameLengthRequiredForAccount, maxNameLength, postToSis) ->
+    ENV.MAX_NAME_LENGTH_REQUIRED_FOR_ACCOUNT = maxNameLengthRequiredForAccount
+    ENV.MAX_NAME_LENGTH = maxNameLength
+    ENV.IS_LARGE_ROSTER = true
+    ENV.CONDITIONAL_RELEASE_SERVICE_ENABLED = false
+    title = 'a'.repeat(length)
+    assignment = view.assignment
+    assignment.attributes.post_to_sis = postToSis
+    return view.validateBeforeSave({title: title, set_assignment: '1', assignment: assignment}, [])
+
+  QUnit.module 'EditView',
     setup: ->
       fakeENV.setup()
     teardown: ->
@@ -110,7 +132,7 @@ GroupCategorySelector, fakeENV, RichContentEditor) ->
     view = @editView()
     equal view.locationAfterCancel({ return_to: 'http://bar' }), 'http://bar'
 
-  module 'EditView - ConditionalRelease',
+  QUnit.module 'EditView - ConditionalRelease',
     setup: ->
       fakeENV.setup()
       ENV.CONDITIONAL_RELEASE_SERVICE_ENABLED = true
@@ -168,6 +190,31 @@ GroupCategorySelector, fakeENV, RichContentEditor) ->
     view = @editView({ withAssignment: true })
     view.loadConditionalRelease()
     equal 1, view.$conditionalReleaseTarget.children().size()
+
+  test "has an error when a title is 257 chars", ->
+    view = @editView({ withAssignment: true})
+    errors = nameLengthHelper(view, 257, false, 30, '0')
+    equal errors["title"][0]["message"], "Title is too long, must be under 257 characters"
+
+  test "allows dicussion to save when a title is 256 chars, MAX_NAME_LENGTH is not required and post_to_sis is true", ->
+    view = @editView({ withAssignment: true})
+    errors = nameLengthHelper(view, 256, false, 30, '1')
+    equal errors.length, 0
+
+  test "has an error when a title > MAX_NAME_LENGTH chars if MAX_NAME_LENGTH is custom, required and post_to_sis is true", ->
+    view = @editView({ withAssignment: true})
+    errors = nameLengthHelper(view, 40, true, 30, '1')
+    equal errors["title"][0]["message"], "Title is too long, must be under 31 characters"
+
+  test "allows discussion to save when title > MAX_NAME_LENGTH chars if MAX_NAME_LENGTH is custom, required and post_to_sis is false", ->
+    view = @editView({ withAssignment: true})
+    errors = nameLengthHelper(view, 40, true, 30, '0')
+    equal errors.length, 0
+
+  test "allows discussion to save when title < MAX_NAME_LENGTH chars if MAX_NAME_LENGTH is custom, required and post_to_sis is true", ->
+    view = @editView({ withAssignment: true})
+    errors = nameLengthHelper(view, 30, true, 40, '1')
+    equal errors.length, 0
 
   test 'conditional release editor is updated on tab change', ->
     view = @editView({ withAssignment: true })
@@ -228,7 +275,10 @@ GroupCategorySelector, fakeENV, RichContentEditor) ->
     view = @editView({ withAssignment: true })
     _.defer =>
       view.$discussionEditView.tabs('option', 'active', 0)
-      view.showErrors({ foo: 'bar', conditional_release: 'bat' })
+      view.showErrors({
+        foo: {type: 'bar'},
+        conditional_release: {type: 'bat'}
+      })
       equal 1, view.$discussionEditView.tabs('option', 'active')
       resolved()
 
@@ -237,6 +287,9 @@ GroupCategorySelector, fakeENV, RichContentEditor) ->
     view = @editView({ withAssignment: true })
     _.defer =>
       view.$discussionEditView.tabs('option', 'active', 1)
-      view.showErrors({ foo: 'bar', baz: 'bat' })
+      view.showErrors({
+        foo: {type: 'bar'},
+        baz: {type: 'bat'}
+      })
       equal 0, view.$discussionEditView.tabs('option', 'active')
       resolved()

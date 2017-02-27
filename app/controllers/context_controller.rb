@@ -20,9 +20,9 @@ class ContextController < ApplicationController
   include SearchHelper
   include CustomSidebarLinksHelper
 
-  before_filter :require_context, :except => [:inbox, :create_media_object, :kaltura_notifications, :media_object_redirect, :media_object_inline, :media_object_thumbnail, :object_snippet]
-  before_filter :require_user, :only => [:inbox, :report_avatar_image]
-  before_filter :reject_student_view_student, :only => [:inbox]
+  before_action :require_context, :except => [:inbox, :create_media_object, :kaltura_notifications, :media_object_redirect, :media_object_inline, :media_object_thumbnail, :object_snippet]
+  before_action :require_user, :only => [:inbox, :report_avatar_image]
+  before_action :reject_student_view_student, :only => [:inbox]
   protect_from_forgery :except => [:kaltura_notifications, :object_snippet], with: :exception
 
   def create_media_object
@@ -297,7 +297,7 @@ class ContextController < ApplicationController
         end
         format.json do
           @accesses = Api.paginate(@accesses, self, polymorphic_url([@context, :user_usage], user_id: @user), default_per_page: 50)
-          render :json => @accesses.map{ |a| a.as_json(methods: [:readable_name, :asset_class_name]) }
+          render :json => @accesses.map{ |a| a.as_json(methods: [:readable_name, :asset_class_name, :icon]) }
         end
       end
     end

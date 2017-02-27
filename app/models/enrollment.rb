@@ -44,7 +44,7 @@ class Enrollment < ActiveRecord::Base
   has_many :role_overrides, :as => :context, :inverse_of => :context
   has_many :pseudonyms, :primary_key => :user_id, :foreign_key => :user_id
   has_many :course_account_associations, :foreign_key => 'course_id', :primary_key => 'course_id'
-  has_many :scores, -> { active }, dependent: :destroy
+  has_many :scores, -> { active }
 
   validates_presence_of :user_id, :course_id, :type, :root_account_id, :course_section_id, :workflow_state, :role_id
   validates_inclusion_of :limit_privileges_to_course_section, :in => [true, false]
@@ -807,7 +807,7 @@ class Enrollment < ActiveRecord::Base
     if result
       self.user.try(:update_account_associations)
       self.user.touch
-      scores.destroy_all
+      scores.update_all(workflow_state: :deleted)
     end
     result
   end
@@ -1027,6 +1027,7 @@ class Enrollment < ActiveRecord::Base
   end
   private :cached_score_or_grade
 
+  # when grading period is nil, we are fetching the overall course score
   def find_score(grading_period_id: nil)
     if scores.loaded?
       scores.find { |score| score.grading_period_id == grading_period_id }
@@ -1034,7 +1035,6 @@ class Enrollment < ActiveRecord::Base
       scores.where(grading_period_id: grading_period_id).first
     end
   end
-  private :find_score
 
   def graded_at
     score = find_score
