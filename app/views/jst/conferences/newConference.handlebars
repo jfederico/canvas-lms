@@ -102,7 +102,7 @@
                   <div class="ig-info">
                     <div class="ig-details">
                       {{#each recording_formats}}
-                        <a href="{{#if ../../published}} {{playback_url}} {{/if}}" target="{{#if ../../published}} _blank {{/if}}"
+                        <a {{#if ../../published}}href="{{playback_url}}" target="_blank"{{/if}}
                           class="ig-title" data-id="{{../recording_id}}" style="line-height: inherit;">
                           {{type}}
                         </a>
@@ -139,18 +139,16 @@
                     </div>
                   {{/if}}
                 </div>
-                {{#if ../published}}
-                  {{#ifEqual images.length 0}}
-                  {{else}}
-                    <div class="recording-thumbnails" data-id="{{ recording_id }}">
-                      {{#each images}}
-                        <img src="{{thumbnail_url}}" alt="{{title}}" class="recording-thumbnail" />
-                        <img src="{{thumbnail_url}}" class="large-thumbnail" />
-                      {{/each}}
-                      <small class="help-text">Hover over an image to view it in full size.</small>
-                    </div>
-                  {{/ifEqual}}
-                {{/if}}
+                {{#ifEqual images.length 0}}
+                {{else}}
+                  <div class="recording-thumbnails{{#if ../../published}}{{else}} hidden{{/if}}" data-id="{{recording_id}}">
+                    {{#each images}}
+                      <img src="{{#if ../../published}}{{thumbnail_url}}{{/if}}" alt="{{title}}" class="recording-thumbnail" data-src="{{thumbnail_url}}" />
+                      <img src="{{#if ../../published}}{{thumbnail_url}}{{/if}}" class="large-thumbnail" data-src="{{thumbnail_url}}" />
+                    {{/each}}
+                    <small class="help-text">Hover over an image to view it in full size.</small>
+                  </div>
+                {{/ifEqual}}
               </div>
             {{/ifEqual}}
           {{else}}

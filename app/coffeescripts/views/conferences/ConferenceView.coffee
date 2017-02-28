@@ -211,6 +211,7 @@ define [
       elem =  if action == 'publish' && data == "true"
                 classHtml: 'btn btn-small ' + action + ' icon-publish'
                 text: I18n.t('conferences.recordings.published', 'Published')
+                dataHtml: data
               else if action == 'publish' && data == "false"
                 classHtml: 'btn btn-small ' + action + ' icon-unpublish'
                 text: I18n.t('conferences.recordings.unpublished', 'Unpublished')
@@ -245,7 +246,9 @@ define [
               $(link[i]).attr("href", format.url)
           i++
         link.attr("target", "_blank")
-        thumbnails.show()
+        $(thumbnails).children('img').each ->
+          $(@).attr('src', $(@).attr('data-src'))
+        thumbnails.removeClass('hidden')
       else
         link.removeAttr("href")
         link.removeAttr("target")
@@ -253,4 +256,6 @@ define [
         while i < link.length
           $(link[i]).find(".ui-icon.ui-icon-extlink.ui-icon-inline").hide()
           i++
-        thumbnails.hide()
+        $(thumbnails).children('img').each ->
+          $(@).attr('src', '')
+        thumbnails.addClass('hidden')
