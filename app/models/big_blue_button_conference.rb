@@ -161,8 +161,7 @@ class BigBlueButtonConference < WebConference
       :recordID => recording_id,
       :publish  => publish
       })
-
-    get_recordings(recording_id)
+    get_recording(recording_id)
   end
 
   def protect_recording(recording_id, protect)
@@ -170,11 +169,10 @@ class BigBlueButtonConference < WebConference
       :recordID => recording_id,
       :protect  => protect
       })
-
-    get_recordings(recording_id)
+    get_recording(recording_id)
   end
 
-  def get_recordings(recording_id)
+  def get_recording(recording_id)
     response_recordings = send_request(:getRecordings, {
       :meetingID => conference_key
       })

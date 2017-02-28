@@ -128,8 +128,28 @@ define [
           recording_id: parent.data("id"),
           publish: "true"
         }, (data) =>
-          this.togglePublishOrProtectButton(parent, 'publish', data.published)
-          this.toggleRecordingLink(data, parent)
+          console.info data
+          if data.published == "true"
+            this.togglePublishOrProtectButton(parent, 'publish', data.published)
+            this.toggleRecordingLink(data, parent)
+          else
+            console.info 'Start polling'
+            (myloop = (i, parent, published) ->
+              console.info 'ping ' + i
+              $.ajaxJSON(parent.data('url') + "/get_recording", "POST", {
+                  recording_id: parent.data("id"),
+                }, (data) =>
+                  if data.published == published
+                    this.togglePublishOrProtectButton(parent, 'publish', data.published)
+                    this.toggleRecordingLink(data, parent)
+                  else if i < 5
+                    setTimeout(() ->
+                      myloop(i + 1, parent, published)
+                    , i * 1000)
+                  else
+                    console.info 'Action failed'
+              )
+            )(1, parent, "true")
       )
 
     unpublish_recording: (e) ->
@@ -140,8 +160,12 @@ define [
           recording_id: parent.data("id"),
           publish: "false"
         }, (data) =>
-          this.togglePublishOrProtectButton(parent, 'publish', data.published)
-          this.toggleRecordingLink(data, parent)
+          console.info data
+          if data.published == "false"
+            this.togglePublishOrProtectButton(parent, 'publish', data.published)
+            this.toggleRecordingLink(data, parent)
+          else
+            console.info 'Start polling'
       )
 
     delete_recording: (e) ->
@@ -240,7 +264,7 @@ define [
             icon.show()
           else
             $(link[i]).addClass('external')
-            $(link[i]).append('<span class="ui-icon ui-icon-extlink ui-icon-inline" title="Links to an external site."></span>')
+            $(link[i]).append('<span class="ui-icon ui-icon-extlink ui-icon-inline" title="' + htmlEscape(I18n.t('Links to an external site.')) + '"></span>')
           for format in data.recording_formats
             if $(link[i]).data('format') == format.type
               $(link[i]).attr("href", format.url)
