@@ -120,53 +120,56 @@ define [
           window.open(data[0].url)
       )
 
-    publish_recording: (e) ->
+    perform_action_on_recording: (e, action_requested) ->
       e.preventDefault()
       parent = $(e.currentTarget).parent()
       this.displaySpinner($(e.currentTarget))
-      $.ajaxJSON(parent.data('url') + "/publish_recording", "POST", {
-          recording_id: parent.data("id"),
-          publish: "true"
-        }, (data) =>
-          console.info data
-          if data.published == "true"
-            this.togglePublishOrProtectButton(parent, 'publish', data.published)
-            this.toggleRecordingLink(data, parent)
+      action = if action_requested == 'publish' || action_requested == 'unpublish' then "publish" else "protect"
+      desired_state = if action_requested == 'publish' || action_requested == 'protect' then "true" else "false"
+      params = {recording_id: parent.data("id")}
+      params[action] = desired_state
+      $.ajaxJSON(parent.data('url') + "/" + action + "_recording", "POST", params,
+        (data) =>
+          current_state = if action == 'publish' then data.published else data.protected
+          if current_state == desired_state
+            this.togglePublishOrProtectButton(parent, action, current_state)
+            this.toggleRecordingLink(parent, data)
           else
-            console.info 'Start polling'
-            (myloop = (i, parent, published) ->
-              console.info 'ping ' + i
-              $.ajaxJSON(parent.data('url') + "/get_recording", "POST", {
-                  recording_id: parent.data("id"),
-                }, (data) =>
-                  if data.published == published
-                    this.togglePublishOrProtectButton(parent, 'publish', data.published)
-                    this.toggleRecordingLink(data, parent)
-                  else if i < 5
-                    setTimeout(() ->
-                      myloop(i + 1, parent, published)
-                    , i * 1000)
-                  else
-                    console.info 'Action failed'
-              )
-            )(1, parent, "true")
+            this.ensure_action_performed_on_recording({attempt: 1, action: action, parent: parent, desired_state: desired_state})
+          return
       )
+      return
+
+    ensure_action_performed_on_recording: (payload) ->
+      $.ajaxJSON(payload.parent.data('url') + "/get_recording", "POST", {
+          recording_id: payload.parent.data("id"),
+        }, (data) =>
+          current_state = if payload.action == 'publish' then data.published else data.protected
+          if current_state == payload.desired_state
+            this.togglePublishOrProtectButton(payload.parent, payload.action, current_state)
+            this.toggleRecordingLink(payload.parent, data)
+          else if payload.attempt < 5
+            payload['attempt'] = payload['attempt'] + 1
+            setTimeout((=> this.ensure_action_performed_on_recording(payload); return;), payload.attempt * 1000)
+          else
+            $.flashError(I18n.t('conferences.recordings.action_error', "Sorry, the action performed on this recording failed. Try again later"))
+            this.togglePublishOrProtectButton(payload.parent, payload.action, current_state)
+            this.toggleRecordingLink(payload.parent, data)
+          return
+      )
+      return
+
+    publish_recording: (e) ->
+      this.perform_action_on_recording(e, 'publish')
 
     unpublish_recording: (e) ->
-      e.preventDefault()
-      parent = $(e.currentTarget).parent()
-      this.displaySpinner($(e.currentTarget))
-      $.ajaxJSON(parent.data('url') + "/publish_recording", "POST", {
-          recording_id: parent.data("id"),
-          publish: "false"
-        }, (data) =>
-          console.info data
-          if data.published == "false"
-            this.togglePublishOrProtectButton(parent, 'publish', data.published)
-            this.toggleRecordingLink(data, parent)
-          else
-            console.info 'Start polling'
-      )
+      this.perform_action_on_recording(e, 'unpublish')
+
+    protect_recording: (e) ->
+      this.perform_action_on_recording(e, 'protect')
+
+    unprotect_recording: (e) ->
+      this.perform_action_on_recording(e, 'unprotect')
 
     delete_recording: (e) ->
       e.preventDefault()
@@ -176,30 +179,6 @@ define [
           recording_id: parent.data("id")
         }, (data) =>
           window.location.reload(true)
-      )
-
-    protect_recording: (e) ->
-      e.preventDefault()
-      parent = $(e.currentTarget).parent()
-      this.displaySpinner($(e.currentTarget))
-      $.ajaxJSON(parent.data('url') + "/protect_recording", "POST", {
-          recording_id: parent.data("id"),
-          protect: "true"
-        }, (data) =>
-          this.togglePublishOrProtectButton(parent, 'protect', data.protected)
-          this.toggleRecordingLink(data, parent)
-      )
-
-    unprotect_recording: (e) ->
-      e.preventDefault()
-      parent = $(e.currentTarget).parent()
-      this.displaySpinner($(e.currentTarget))
-      $.ajaxJSON(parent.data('url') + "/protect_recording", "POST", {
-          recording_id: parent.data("id"),
-          protect: "false"
-        }, (data) =>
-          this.togglePublishOrProtectButton(parent, 'protect', data.protected)
-          this.toggleRecordingLink(data, parent)
       )
 
     mouse_enter: (e) ->
@@ -252,11 +231,11 @@ define [
       spinner.hide()
       $('<a class="' + elem.classHtml + '" ' + attribute.dataHtml + '="' + elem.dataHtml + '">' + htmlEscape(elem.text) + '</a>').insertAfter(spinner)
 
-    toggleRecordingLink: (data, parent) ->
+    toggleRecordingLink: (parent, data) ->
       thumbnails = $('.recording-thumbnails[data-id="' + parent.data("id") + '"]')
       link = $('a[data-id="' + parent.data("id") + '"]')
       ext_icon = []
-      if data.published == "true" || data.protected
+      if data.published == "true"
         i = 0
         while i < link.length
           icon = $(link[i]).find(".ui-icon.ui-icon-extlink.ui-icon-inline")
@@ -264,7 +243,7 @@ define [
             icon.show()
           else
             $(link[i]).addClass('external')
-            $(link[i]).append('<span class="ui-icon ui-icon-extlink ui-icon-inline" title="' + htmlEscape(I18n.t('Links to an external site.')) + '"></span>')
+            $(link[i]).append('<span class="ui-icon ui-icon-extlink ui-icon-inline" title="' + htmlEscape(I18n.t('external_link', "Links to an external site.")) + '"></span>')
           for format in data.recording_formats
             if $(link[i]).data('format') == format.type
               $(link[i]).attr("href", format.url)
