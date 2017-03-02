@@ -133,35 +133,36 @@ define [
       this.perform_action_on_recording(e, 'unprotect')
 
     delete_recording: (e) ->
-      e.preventDefault()
-      parent = $(e.currentTarget).parent()
       return if !confirm(I18n.t('recordings.confirm.delete', "Are you sure you want to delete this recording?\n\nYou will not be able to reopen it."))
-      this.toggleDeleteButton(parent, "processing")
-      this.toggleRecordingLink(parent, {published: "false"})
-      $.ajaxJSON(parent.data('url') + "/delete_recording", "POST", {
-          recording_id: parent.data("id")
-        }, (data) =>
-          if $.isEmptyObject(data)
-            this.removeRecordingRow(parent)
-          else
-            this.ensure_action_performed_on_recording({attempt: 1, action: 'delete', parent: parent, desired_state: "true"})
-      )
-      return
+      this.perform_action_on_recording(e, 'delete')
 
     perform_action_on_recording: (e, action_requested) ->
       e.preventDefault()
       parent = $(e.currentTarget).parent()
-      this.displaySpinner($(e.currentTarget))
-      action = if action_requested == 'publish' || action_requested == 'unpublish' then "publish" else "protect"
-      desired_state = if action_requested == 'publish' || action_requested == 'protect' then "true" else "false"
       params = {recording_id: parent.data("id")}
-      params[action] = desired_state
+      desired_state = if action_requested == 'delete' || action_requested == 'publish' || action_requested == 'protect' then "true" else "false"
+      if action_requested == 'delete'
+        this.toggleDeleteButton(parent, "processing")
+        this.toggleRecordingLink(parent, {published: "false"})
+        action = 'delete'
+      else
+        this.displaySpinner($(e.currentTarget))
+        action = if action_requested == 'publish' || action_requested == 'unpublish' then "publish" else "protect"
+        params[action] = desired_state
       $.ajaxJSON(parent.data('url') + "/" + action + "_recording", "POST", params,
         (data) =>
-          current_state = if action == 'publish' then data.published else data.protected
+          if action == 'delete'
+            current_state = if $.isEmptyObject(data) then "true" else "false"
+          else if action == 'publish'
+            current_state = data.published
+          else
+            current_state = data.protected
           if current_state == desired_state
-            this.togglePublishOrProtectButton(parent, action, current_state)
-            this.toggleRecordingLink(parent, data)
+            if action == 'delete'
+              this.removeRecordingRow(parent)
+            else
+              this.togglePublishOrProtectButton(parent, action, current_state)
+              this.toggleRecordingLink(parent, data)
           else
             this.ensure_action_performed_on_recording({attempt: 1, action: action, parent: parent, desired_state: desired_state})
           return
@@ -293,4 +294,10 @@ define [
 
     removeRecordingRow: (parent) ->
       row = $('.ig-row[data-id="' + parent.data("id") + '"]')
-      row.remove()
+      list = $(row.parent().parent())
+      if list.children().length == 1
+        container = $(list.parent())
+        container.remove()
+      else
+        list_element = $(row.parent())
+        list_element.remove()
