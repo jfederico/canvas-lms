@@ -42,7 +42,7 @@
         </a>
         <ul id="{{id}}-content-1" class="al-options" role="menu" aria-hidden="true" aria-expanded="false" aria-activedescendant="{{id}}-content-2">
           <li role="presentation">
-            <a href="{{ url }}"
+            <a href="{{url}}"
                 class="icon-trash  delete_conference_link"
                 id="{{id}}-content-3"
                 role="menuitem"
@@ -62,13 +62,13 @@
         <li>
           {{#if recording_vendor}}
             {{#ifEqual recording_vendor "big_blue_button"}}
-              <div class="ig-row">
+              <div class="ig-row" data-id="{{recording_id}}" style="text-align: center;">
                 <div class="ig-row__layout">
                   <div class="ig-info">
                     <div class="ig-details">
                       {{#each recording_formats}}
                         <a {{#if ../../published}}href="{{playback_url}}" target="_blank"{{/if}}
-                          class="ig-title" data-id="{{../recording_id}}" style="line-height: inherit;" data-format="{{ type }}">
+                          class="ig-title" data-id="{{../recording_id}}" style="line-height: inherit;" data-format="{{type}}">
                           {{type}}
                         </a>
                       {{/each}}
@@ -78,7 +78,10 @@
                     </div>
                   </div>
                   {{#if ../../../permissions.delete}}
-                    <div class="ig-button" data-id="{{ recording_id }}" data-url="{{../../../../url}}">
+                    <div class="ig-loader" data-id="{{recording_id}}" style="display: none;">
+                      <img src="/images/ajax-loader-black-on-white.gif" class="loader" />
+                    </div>
+                    <div class="ig-button" data-id="{{recording_id}}" data-url="{{../../../../url}}">
                       {{#ifNull ../protected}}
                       {{else}}
                         <img src="/images/ajax-loader-black-on-white.gif" class="loader" data-action="protect" style="display: none;" />
@@ -106,7 +109,7 @@
                 </div>
                 {{#ifEqual images.length 0}}
                 {{else}}
-                  <div class="recording-thumbnails{{#if ../../published}}{{else}} hidden{{/if}}" data-id="{{ recording_id }}">
+                  <div class="recording-thumbnails{{#if ../../published}}{{else}} hidden{{/if}}" data-id="{{recording_id}}">
                     {{#each images}}
                       <img src="{{#if ../../published}}{{thumbnail_url}}{{/if}}" alt="{{title}}" class="recording-thumbnail" data-src="{{thumbnail_url}}" />
                       <img src="{{#if ../../published}}{{thumbnail_url}}{{/if}}" class="large-thumbnail" data-src="{{thumbnail_url}}" />

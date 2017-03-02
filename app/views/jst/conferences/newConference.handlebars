@@ -40,17 +40,17 @@
     </div>
     <div class="ig-admin">
       {{# if show_end}}
-        <a class='btn btn-small close_conference_link' href="{{ url }}/close">{{#t "end_it_now"}}End{{/t}}</a>
+        <a class='btn btn-small close_conference_link' href="{{url}}/close">{{#t "end_it_now"}}End{{/t}}</a>
       {{/if}}
       {{#if started_at}}
         {{#if permissions.join}}
-          <a href="{{ join_url }}" class="btn btn-small join-button btn-primary" target="_blank">
+          <a href="{{join_url}}" class="btn btn-small join-button btn-primary" target="_blank">
             {{#t "join"}}Join{{/t}}
           </a>
         {{/if}}
       {{else}}
         {{#if permissions.initiate}}
-          <a href="{{ join_url }}" class="btn btn-small start-button" target="_blank" {{#unless id}}disabled="disabled"{{/unless}}>
+          <a href="{{join_url}}" class="btn btn-small start-button" target="_blank" {{#unless id}}disabled="disabled"{{/unless}}>
             {{#t "start"}}Start{{/t}}
          </a>
         {{/if}}
@@ -66,7 +66,7 @@
           <ul id="{{id}}-content-1" class="al-options" role="menu" aria-hidden="true" aria-expanded="false" aria-activedescendant="{{id}}-content-2">
             {{#if permissions.update}}
               <li role="presentation">
-                <a href="#conference_{{ id }}"
+                <a href="#conference_{{id}}"
                     class="icon-edit edit_conference_link"
                     id="{{id}}-content-2"
                     role="menuitem"
@@ -75,7 +75,7 @@
             {{/if}}
             {{#if permissions.delete}}
               <li role="presentation">
-                <a href="{{ url }}"
+                <a href="{{url}}"
                     class="icon-trash  delete_conference_link"
                     id="{{id}}-content-3"
                     role="menuitem"
@@ -97,13 +97,13 @@
         <li>
           {{#if recording_vendor}}
             {{#ifEqual recording_vendor "big_blue_button"}}
-              <div class="ig-row" style="text-align: center;">
+              <div class="ig-row" data-id="{{recording_id}}" style="text-align: center;">
                 <div class="ig-row__layout">
                   <div class="ig-info">
                     <div class="ig-details">
                       {{#each recording_formats}}
                         <a {{#if ../../published}}href="{{playback_url}}" target="_blank"{{/if}}
-                          class="ig-title" data-id="{{../recording_id}}" style="line-height: inherit;" data-format="{{ type }}">
+                          class="ig-title" data-id="{{../recording_id}}" style="line-height: inherit;" data-format="{{type}}">
                           {{type}}
                         </a>
                       {{/each}}
@@ -113,7 +113,10 @@
                     </div>
                   </div>
                   {{#if ../../../permissions.delete}}
-                    <div class="ig-button" data-id="{{ recording_id }}" data-url="{{../../../../url}}">
+                    <div class="ig-loader" data-id="{{recording_id}}" style="display: none;">
+                      <img src="/images/ajax-loader-black-on-white.gif" class="loader" />
+                    </div>
+                    <div class="ig-button" data-id="{{recording_id}}" data-url="{{../../../../url}}">
                       {{#ifNull ../protected}}
                       {{else}}
                         <img src="/images/ajax-loader-black-on-white.gif" class="loader" data-action="protect" style="display: none;" />

@@ -120,6 +120,34 @@ define [
           window.open(data[0].url)
       )
 
+    publish_recording: (e) ->
+      this.perform_action_on_recording(e, 'publish')
+
+    unpublish_recording: (e) ->
+      this.perform_action_on_recording(e, 'unpublish')
+
+    protect_recording: (e) ->
+      this.perform_action_on_recording(e, 'protect')
+
+    unprotect_recording: (e) ->
+      this.perform_action_on_recording(e, 'unprotect')
+
+    delete_recording: (e) ->
+      e.preventDefault()
+      parent = $(e.currentTarget).parent()
+      return if !confirm(I18n.t('recordings.confirm.delete', "Are you sure you want to delete this recording?\n\nYou will not be able to reopen it."))
+      this.toggleDeleteButton(parent, "processing")
+      this.toggleRecordingLink(parent, {published: "false"})
+      $.ajaxJSON(parent.data('url') + "/delete_recording", "POST", {
+          recording_id: parent.data("id")
+        }, (data) =>
+          if $.isEmptyObject(data)
+            this.removeRecordingRow(parent)
+          else
+            this.ensure_action_performed_on_recording({attempt: 1, action: 'delete', parent: parent, desired_state: "true"})
+      )
+      return
+
     perform_action_on_recording: (e, action_requested) ->
       e.preventDefault()
       parent = $(e.currentTarget).parent()
@@ -144,42 +172,31 @@ define [
       $.ajaxJSON(payload.parent.data('url') + "/get_recording", "POST", {
           recording_id: payload.parent.data("id"),
         }, (data) =>
-          current_state = if payload.action == 'publish' then data.published else data.protected
+          if payload.action == 'delete'
+            current_state = if $.isEmptyObject(data) then "true" else "false"
+          else if payload.action == 'publish'
+            current_state = data.published
+          else
+            current_state = data.protected
           if current_state == payload.desired_state
-            this.togglePublishOrProtectButton(payload.parent, payload.action, current_state)
-            this.toggleRecordingLink(payload.parent, data)
+            if payload.action == 'delete'
+              this.removeRecordingRow(payload.parent)
+            else
+              this.togglePublishOrProtectButton(payload.parent, payload.action, current_state)
+              this.toggleRecordingLink(payload.parent, data)
           else if payload.attempt < 5
             payload['attempt'] = payload['attempt'] + 1
             setTimeout((=> this.ensure_action_performed_on_recording(payload); return;), payload.attempt * 1000)
           else
             $.flashError(I18n.t('conferences.recordings.action_error', "Sorry, the action performed on this recording failed. Try again later"))
-            this.togglePublishOrProtectButton(payload.parent, payload.action, current_state)
+            if payload.action == 'delete'
+              this.toggleDeleteButton(payload.parent, "processed")
+            else
+              this.togglePublishOrProtectButton(payload.parent, payload.action, current_state)
             this.toggleRecordingLink(payload.parent, data)
           return
       )
       return
-
-    publish_recording: (e) ->
-      this.perform_action_on_recording(e, 'publish')
-
-    unpublish_recording: (e) ->
-      this.perform_action_on_recording(e, 'unpublish')
-
-    protect_recording: (e) ->
-      this.perform_action_on_recording(e, 'protect')
-
-    unprotect_recording: (e) ->
-      this.perform_action_on_recording(e, 'unprotect')
-
-    delete_recording: (e) ->
-      e.preventDefault()
-      parent = $(e.currentTarget).parent()
-      return if !confirm(I18n.t('recordings.confirm.delete', "Are you sure you want to delete this recording?\n\nYou will not be able to reopen it."))
-      $.ajaxJSON(parent.data('url') + "/delete_recording", "POST", {
-          recording_id: parent.data("id")
-        }, (data) =>
-          window.location.reload(true)
-      )
 
     mouse_enter: (e) ->
       elem = $(e.currentTarget)
@@ -262,3 +279,18 @@ define [
         $(thumbnails).children('img').each ->
           $(@).attr('src', '')
         thumbnails.addClass('hidden')
+
+    toggleDeleteButton: (parent, data) ->
+      buttons = $('.ig-button[data-id="' + parent.data("id") + '"]')
+      spinner = $('.ig-loader[data-id="' + parent.data("id") + '"]')
+      if data == 'processing'
+        buttons.hide()
+        spinner.show()
+      else
+        spinner.hide()
+        buttons.show()
+      return
+
+    removeRecordingRow: (parent) ->
+      row = $('.ig-row[data-id="' + parent.data("id") + '"]')
+      row.remove()

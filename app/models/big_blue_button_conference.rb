@@ -144,16 +144,18 @@ class BigBlueButtonConference < WebConference
       for page in 0..(recordings.length / page_size + 1)
         offset = page * page_size
         recs = recordings[(offset)..(offset + page_size)]
-        delete_recording(recs.join(","))
+        send_request(:deleteRecordings, {
+          :recordID => recs.join(","),
+          })
       end
     end
   end
 
   def delete_recording(recording_id)
-    response = send_request(:deleteRecordings, {
+    send_request(:deleteRecordings, {
       :recordID => recording_id,
       })
-    response[:deleted] if response
+    get_recording(recording_id)
   end
 
   def publish_recording(recording_id, publish)
@@ -177,8 +179,10 @@ class BigBlueButtonConference < WebConference
       :meetingID => conference_key
       })
     recording = response_recordings[:recordings].find{ |r| r[:recordID]==recording_id }
-    response = { :published => recording[:published], :protected => recording[:protected], :recording_formats => [] }
-    recording[:playback].each{ |formats| response[:recording_formats] << { :type => formats[:type].capitalize, :url => formats[:url] } }
+    if recording
+      response = { :published => recording[:published], :protected => recording[:protected], :recording_formats => [] }
+      recording[:playback].each{ |formats| response[:recording_formats] << { :type => formats[:type].capitalize, :url => formats[:url] } }
+    end
     response if response
   end
 
