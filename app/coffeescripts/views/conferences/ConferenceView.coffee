@@ -227,27 +227,28 @@ define [
       elem.remove()
 
     togglePublishOrProtectButton: (parent, action, data) ->
+      actionHtml = action
       attribute = dataHtml: 'data-' + action
       spinner = parent.find('img.loader[data-action="' + action + '"]')
       elem =  if action == 'publish' && data == "true"
                 classHtml: 'btn btn-small ' + action + ' icon-publish'
-                text: I18n.t('conferences.recordings.published', 'Published')
+                text: htmlEscape(I18n.t('conferences.recordings.published', 'Published'))
                 dataHtml: data
               else if action == 'publish' && data == "false"
                 classHtml: 'btn btn-small ' + action + ' icon-unpublish'
-                text: I18n.t('conferences.recordings.unpublished', 'Unpublished')
+                text: htmlEscape(I18n.t('conferences.recordings.unpublished', 'Unpublished'))
                 dataHtml: data
               else if action == 'protect' && data=="true"
                 classHtml: 'btn btn-small ' + action + ' icon-lock'
-                text: I18n.t('conferences.recordings.protected', 'Protected')
+                text: htmlEscape(I18n.t('conferences.recordings.protected', 'Protected'))
                 dataHtml: data
               else if action == 'protect' && data=="false"
                 classHtml: 'btn btn-small ' + action + ' icon-unlock'
-                text: I18n.t('conferences.recordings.unprotected', 'Unprotected')
+                text: htmlEscape(I18n.t('conferences.recordings.unprotected', 'Unprotected'))
                 dataHtml: data
 
       spinner.hide()
-      $('<a class="' + elem.classHtml + '" ' + attribute.dataHtml + '="' + elem.dataHtml + '">' + htmlEscape(elem.text) + '</a>').insertAfter(spinner)
+      $('<a class="' + elem.classHtml + '" ' + attribute.dataHtml + '="' + elem.dataHtml + '">' + elem.text + '</a>').insertAfter(spinner)
 
     toggleRecordingLink: (parent, data) ->
       thumbnails = $('.recording-thumbnails[data-id="' + parent.data("id") + '"]')
