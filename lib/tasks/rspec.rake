@@ -198,5 +198,30 @@ unless Rails.env.production? || ARGV.any? { |a| a =~ /\Agems/ }
         end
       end
     end
+
+    desc "Run the code examples in spec/models/big_blue_button_conference_spec.rb"
+    klass.new(:big_blue_button_conference) do |t|
+      t.send(spec_files_attr, FileList["spec/models/**/big_blue_button_conference_spec.rb"])
+    end
+
+    desc "Run the code examples in spec/models/big_blue_button_recordings_spec.rb"
+    klass.new(:big_blue_button_recordings) do |t|
+      t.send(spec_files_attr, FileList["spec/models/**/big_blue_button_recordings_spec.rb"])
+    end
+
+    desc "Run the code examples in spec/controllers/big_blue_button_conferences_controller_spec.rb"
+    klass.new(:controller_conferences) do |t|
+      t.send(spec_files_attr, FileList["spec/controllers/**/big_blue_button_conferences_controller_spec.rb"])
+    end
+
+    desc "Run the code examples in spec/selenium/conferences/conference_spec.rb"
+    klass.new(:selenium_conferences) do |t|
+      t.send(spec_files_attr, FileList["spec/selenium/conferences/**/conference_spec.rb"])
+    end
+
+    desc "Run the code examples in spec/selenium/conferences/big_blue_button_conference_spec.rb"
+    klass.new(:selenium_big_blue_button_conferences) do |t|
+      t.send(spec_files_attr, FileList["spec/selenium/conferences/**/big_blue_button_conference_spec.rb"])
+    end
   end
 end
