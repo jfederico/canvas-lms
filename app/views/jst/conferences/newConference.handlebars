@@ -7,7 +7,7 @@
             aria-controls="conference-{{id}}"
             aria-expanded="false"
             role="button">
-          <i class="icon-mini-arrow-right"></i>
+          <i class="icon-mini-arrow-right auto_rotate"></i>
           {{title}}
         </a>
       {{else}}
@@ -22,14 +22,20 @@
         {{#if scheduled}}
           <div>{{datetimeFormatted scheduled_at}}</div>
         {{/if}}
-        {{#if recording}}
-          {{#if multipleRecordings}}
-            <div>{{#t "recordings"}}{{recordingCount}} Recordings{{/t}}</div>
-          {{else}}
-            <div>{{#t "recording"}}1 Recording{{/t}}</div>
-          {{/if}}
+        {{#if description}}
+          <div class="ig-details__item ig-details__item--wrap-text">
+            {{description}}
+          </div>
         {{/if}}
-        <div>{{description}}</div>
+        {{#if recording}}
+          <div class="ig-details__item-recordings ig-details__item-recordings--wrap-text">
+          {{#if multipleRecordings}}
+            {{#t "recordings"}}{{recordingCount}} Recordings{{/t}}
+          {{else}}
+            {{#t "recording"}}1 Recording{{/t}}
+          {{/if}}
+          </div>
+        {{/if}}
       </div>
     </div>
     <div class="ig-admin">
@@ -89,23 +95,29 @@
     <ul>
       {{#each recordings}}
         <li>
-          <div class="ig-row">
+          <div class="ig-row" data-id="{{recording_id}}" style="text-align: center;">
             <div class="ig-row__layout">
               <div class="ig-info">
                 <div class="ig-details">
-                  <a href="{{playback_url}}" target="_blank" class="ig-title">
+                  <a href="{{playback_url}}" target="_blank" class="ig-title"
+                    style="line-height: inherit;" data-id="{{recording_id}}" data-format="presentation">
                     {{title}}
                   </a>
                   {{dateString created_at}}
                   &nbsp;&#124;&nbsp;
-                  {{minutesToHM duration_minutes}}
+                  {{durationToString duration_minutes}}
                 </div>
               </div>
-              <div class="ig-button">
-                <a class="btn btn-small" target="_blank" href="{{playback_url}}">
-                  {{#t "view"}}View{{/t}}
-                </a>
-              </div>
+              {{#if ../permissions.delete}}
+                <div class="ig-loader" data-id="{{recording_id}}" data-action="delete" style="display: none;">
+                  <img src="/images/ajax-loader-black-on-white.gif" class="loader" />
+                </div>
+                <div class="ig-button" data-id="{{recording_id}}" data-action="delete" data-url="{{../../url}}">
+                  <a class="btn btn-small icon-trash delete_recording_link">
+                    {{#t "delete"}}Delete{{/t}}
+                  </a>
+                </div>
+              {{/if}}
             </div>
           </div>
         </li>

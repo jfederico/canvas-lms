@@ -150,6 +150,16 @@ define [
       real_min_str = (if real_minutes < 10 then "0" + real_minutes else real_minutes)
       "#{hours}:#{real_min_str}"
 
+    # Convert the total amount of minutes into a readable duration format.
+    durationToString : (minutes) ->
+      hours = Math.floor(minutes / 60)
+      real_minutes = minutes % 60
+      if minutes >= 60
+        return I18n.t("Duration: %{hours} and %{minutes}", {hours: hours, minutes: real_minutes})
+      if minutes > 1
+        return I18n.t("Duration: %{count} minutes", {count: real_minutes})
+      return I18n.t("Duration: 1 minute")
+
     # helper for easily creating icon font markup
     addIcon : (icontype) ->
       new Handlebars.SafeString "<i class='icon-#{htmlEscape icontype}'></i>"

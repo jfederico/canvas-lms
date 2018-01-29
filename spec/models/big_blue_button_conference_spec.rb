@@ -163,6 +163,38 @@ describe BigBlueButtonConference do
         @bbb.recordings
       end
     end
+
+    describe "delete recording" do
+      before(:once) do
+        @bbb = BigBlueButtonConference.new(user: user_factory, context: course_factory)
+        # set some vars so it thinks it's been created and doesn't do an api call
+        @bbb.conference_key = 'test'
+        @bbb.settings[:admin_key] = 'admin'
+        @bbb.settings[:user_key] = 'user'
+        @bbb.save
+      end
+
+      it "doesn't delete anything if record_id = nil" do
+        recording_id = nil
+        allow(@bbb).to receive(:send_request)
+        response = @bbb.delete_recording(recording_id)
+        expect(response[:deleted]).to eq "false"
+      end
+
+      it "doesn't delete the recording if record_id is not found" do
+        recording_id = ''
+        allow(@bbb).to receive(:send_request).and_return({:returncode=>"SUCCESS", :deleted=>"false"})
+        response = @bbb.delete_recording(recording_id)
+        expect(response[:deleted]).to eq "false"
+      end
+
+      it "does delete the recording if record_id is found" do
+        recording_id = '18974fe54920ac60ba913e34f49e4a9dabfeea2c-1513031142256'
+        allow(@bbb).to receive(:send_request).and_return({:returncode=>"SUCCESS", :deleted=>"true"})
+        response = @bbb.delete_recording(recording_id)
+        expect(response[:deleted]).to eq "true"
+      end
+    end
   end
 
   describe 'plugin setting recording disabled' do

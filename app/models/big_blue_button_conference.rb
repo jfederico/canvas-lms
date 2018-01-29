@@ -90,10 +90,23 @@ class BigBlueButtonConference < WebConference
       recording_format = recording.fetch(:playback, {}).fetch(:format, {})
       {
         recording_id:     recording[:recordID],
+        title:            recording[:name],
         duration_minutes: recording_format[:length].to_i,
         playback_url:     recording_format[:url],
+        ended_at:         recording[:endTime].to_i,
       }
     end
+  end
+
+  def delete_recording(recording_id)
+    deleted = "false"
+    unless recording_id.nil?
+      response = send_request(:deleteRecordings, {
+        :recordID => recording_id,
+        })
+      deleted = response[:deleted] if !response.nil?
+    end
+    {:deleted => deleted}
   end
 
   def delete_all_recordings
@@ -149,13 +162,6 @@ class BigBlueButtonConference < WebConference
     Array(result)
   end
 
-  def delete_recording(recording_id)
-    response = send_request(:deleteRecordings, {
-      :recordID => recording_id,
-      })
-    response[:deleted] if response
-  end
-
   def generate_request(action, options)
     query_string = options.to_query
     query_string << ("&checksum=" + Digest::SHA1.hexdigest(action.to_s + query_string + config[:secret_dec]))
@@ -164,7 +170,6 @@ class BigBlueButtonConference < WebConference
 
   def send_request(action, options)
     url_str = generate_request(action, options)
-
     http_response = nil
     Canvas.timeout_protection("big_blue_button") do
       logger.debug "big blue button api call: #{url_str}"

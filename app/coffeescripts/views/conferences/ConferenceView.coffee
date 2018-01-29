@@ -20,9 +20,10 @@ define [
   'jquery'
   'Backbone'
   'jst/conferences/newConference'
+  'str/htmlEscape'
   'jquery.google-analytics'
   '../../jquery.rails_flash_notifications'
-], (I18n, $, {View}, template) ->
+], (I18n, $, {View}, template, htmlEscape) ->
 
   class ConferenceView extends View
 
@@ -38,6 +39,7 @@ define [
       'click .close_conference_link': 'close'
       'click .start-button': 'start'
       'click .external_url': 'external'
+      'click .delete_recording_link': 'deleteRecording'
 
     initialize: ->
       super
@@ -126,3 +128,81 @@ define [
         else
           window.open(data[0].url)
       )
+
+    deleteRecording: (e) ->
+      return if !confirm(I18n.t('recordings.confirm.delete', "Are you sure you want to delete this recording?"))
+      e.preventDefault()
+      $deleteButton = $(e.currentTarget).parent()
+      @toggleActionButton($deleteButton, {state: "processing", action: "delete"})
+      @toggleRecordingLink($deleteButton, {state: "processing"})
+      $.ajaxJSON($deleteButton.data('url') + "/recording", "DELETE", {
+          recording_id: $deleteButton.data("id"),
+        }, (data) =>
+          if data.deleted == "true"
+            @removeRecordingRow($deleteButton)
+            return
+          @ensureActionPerformed($deleteButton, 1, @removeRecordingRow)
+      )
+
+    ensureActionPerformed: ($button, attempt, callback) =>
+      $.ajaxJSON($button.data('url') + "/recording", "GET", {
+          recording_id: $button.data("id"),
+        }, (data) =>
+          if $.isEmptyObject(data)
+            callback($button)
+            return
+          if attempt < 5
+            attempt += 1
+            setTimeout((=> @ensureActionPerformed($button, attempt, callback); return;), attempt * 1000)
+            return
+          $.flashError(I18n.t('conferences.recordings.action_error', "Sorry, the action performed on this recording failed. Try again later"))
+          @toggleActionButton($button, {state: "processed", action: "delete"})
+          @toggleRecordingLink($button, {state: "processed"})
+      )
+
+    toggleActionButton: ($button, data) =>
+      $spinner = $('.ig-loader[data-id="' + $button.data("id") + '"][data-action="' + data.action + '"]')
+      if data.state == 'processing'
+        $button.hide()
+        $spinner.show()
+        return
+      $spinner.hide()
+      $button.show()
+
+    toggleRecordingLink: ($button, data) =>
+      $link = $('a[data-id="' + $button.data("id") + '"]')
+      if data.state == 'processing'
+          $link.bind 'click', ->
+            return false
+          return
+      $link.unbind 'click'
+
+    removeRecordingRow: ($button) =>
+      $row = $('.ig-row[data-id="' + $button.data("id") + '"]')
+      containerId = $($row.parent().parent().parent()).attr('id')
+      $row.parent().remove()
+      id = containerId.substring(11, containerId.length)
+      @updateConferenceDetails(containerId.substring(11, containerId.length))
+
+    updateConferenceDetails: (id) =>
+      $info = $('div.ig-row#conf_' + id).children().children('div.ig-info')
+      $detailRecordings = $info.children('div.ig-details').children('div.ig-details__item-recordings')
+      $recordings = $('.ig-sublist#conference-' + id)
+      recordings = $recordings.children().children().length
+      # If it has more than one recording
+      if recordings > 1
+        $detailRecordings.text(I18n.t('recordings.recordings', "%{count} Recordings", {count: recordings}))
+        return
+      # If it has only one recording
+      if recordings == 1
+        $detailRecordings.text(I18n.t('recordings.recording', "%{count} Recording", {count: 1}))
+        return
+      # If it has no recordings
+      $detailRecordings.remove()
+      $recordings.remove()
+      @shiftLinkToText($info, 'ig-title')
+
+    shiftLinkToText: ($container, target) =>
+      $link = $container.children('a.' + target)
+      $container.prepend('<span class="' + target + '">' + $link.text() + '</span>')
+      $link.remove()

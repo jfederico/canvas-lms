@@ -34,6 +34,19 @@ module ConferencesCommon
     close_modal_if_present
   end
 
+  def delete_recording_button
+    f('.delete_recording_link', new_conference_list)
+  end
+
+  def delete_recording_in_first_conference_in_list
+    delete_recording_button.click
+    close_modal_if_present
+  end
+
+  def first_conference_in_list(conference_list)
+    f('.conference', conference_list)
+  end
+
   def new_conference_list
     f('#new-conference-list')
   end
@@ -58,6 +71,14 @@ module ConferencesCommon
     expect(concluded_conference_list).to include_text 'There are no concluded conferences'
   end
 
+  def verify_conference_includes_recordings
+    expect(first_conference_in_list(new_conference_list)).to include_text 'Recording'
+  end
+
+  def verify_conference_does_not_include_recordings
+    expect(first_conference_in_list(new_conference_list)).not_to include_text 'Recording'
+  end
+
   def initialize_wimba_conference_plugin
     PluginSetting.create!(
       name: 'wimba',
@@ -73,6 +94,31 @@ module ConferencesCommon
       user: @user,
       context: @course,
       duration: duration
+    )
+  end
+
+  def initialize_big_blue_button_conference_plugin(domain = 'bbb.instructure.com', secret = 'secret')
+    PluginSetting.create!(
+      name: 'big_blue_button',
+      settings: {
+        domain: domain,
+        secret: secret,
+        recording_enabled: true
+      }
+    )
+  end
+
+  def create_big_blue_button_conference(conference_key = 'instructure_web_conference_defaultkey', title = 'BigBlueButton Conference', duration=60, record=true)
+    BigBlueButtonConference.create!(
+      conference_key: conference_key,
+      title: title,
+      user: @user,
+      context: @course,
+      duration: duration,
+      conference_type: 'BigBlueButton',
+      settings: {
+        record: record
+      }
     )
   end
 
@@ -156,4 +202,12 @@ module ConferencesCommon
     conf.close
     conf.save!
   end
+
+  def big_blue_button_mock_response(request = '', response = '')
+    filename = '/../../fixtures/files/conferences/big_blue_button'
+    filename += '_' + request if !request.empty?
+    filename += '_' + response if !response.empty?
+    File.read(File.expand_path(File.dirname(__FILE__) + filename + '.xml'))
+  end
+
 end
