@@ -110,7 +110,7 @@ test('deleteRecordings calls screenreader', function() {
     recordings: [
       {
         duration_minutes: 0,
-        ended_at: 1518554650000,
+        created_at: 1518554650000,
         playback_url: "www.blah.com",
         recording_id: "954cc3",
         title: "Conference"

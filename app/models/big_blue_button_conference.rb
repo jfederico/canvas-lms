@@ -105,7 +105,7 @@ class BigBlueButtonConference < WebConference
       title:            recording[:name],
       duration_minutes: filter_duration(recording_formats),
       playback_formats: filter_formats(recording_formats),
-      ended_at:         recording[:endTime].to_i,
+      created_at:       recording[:startTime].to_i,
     }
   end
 
@@ -182,7 +182,7 @@ class BigBlueButtonConference < WebConference
   def generate_request(action, options)
     query_string = options.to_query
     query_string << ("&checksum=" + Digest::SHA1.hexdigest(action.to_s + query_string + config[:secret_dec]))
-    "https://#{config[:domain]}/bigbluebutton/api/#{action}?#{query_string}"
+    "http://#{config[:domain]}/bigbluebutton/api/#{action}?#{query_string}"
   end
 
   def send_request(action, options)
