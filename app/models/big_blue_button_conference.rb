@@ -117,7 +117,7 @@ class BigBlueButtonConference < WebConference
   end
 
   def filter_formats(recording_formats)
-    recording_formats.delete_if { |recording_format| recording_format[:type] == "statistics" && user.id != self.user_id }
+    recording_formats.delete_if { |recording_format| recording_format[:length].nil? && user.id != self.user_id }
   end
 
   def delete_recording(recording_id)
