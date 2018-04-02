@@ -117,7 +117,7 @@ test('deleteRecordings calls screenreader', function() {
           url: "www.blah.com",
           length: 0
         }],
-        ended_at: 1518554650000,
+        created_at: 1518554650000,
       }
     ],
     user_settings: {

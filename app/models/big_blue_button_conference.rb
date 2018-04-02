@@ -105,7 +105,7 @@ class BigBlueButtonConference < WebConference
       title:            recording[:name],
       duration_minutes: filter_duration(recording_formats),
       playback_formats: filter_formats(recording_formats),
-      ended_at:         recording[:endTime].to_i,
+      created_at:       recording[:startTime].to_i,
     }
   end
 
