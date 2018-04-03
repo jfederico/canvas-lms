@@ -110,13 +110,20 @@ test('deleteRecordings calls screenreader', function() {
     recordings: [
       {
         recording_id: "954cc3",
-        title: "Conference"
+        title: "Conference",
         duration_minutes: 0,
-        playback_formats: [{
-          type: "presentation",
-          url: "www.blah.com",
-          length: 0
-        }],
+        playback_formats: [
+          {
+            type: "statistics",
+            url: "www.blah.com",
+            length: null
+          },
+          {
+            type: "presentation",
+            url: "www.blah.com",
+            length: 0
+          }
+        ],
         created_at: 1518554650000,
       }
     ],
