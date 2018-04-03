@@ -21,6 +21,11 @@
       </metadata>
       <playback>
         <format>
+          <type>statistics</type>
+          <url>http://bbb.blah.com/mock/statistics/0225ccf234655ae60658ccac1e272d48781b491c-1511812307014</url>
+          <length/>
+        </format>
+        <format>
           <type>presentation</type>
           <url>http://bbb.blah.com/mock/playback/0225ccf234655ae60658ccac1e272d48781b491c-1511812307014</url>
           <processingTime>9922</processingTime>

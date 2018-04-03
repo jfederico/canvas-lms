@@ -22,6 +22,11 @@
       </metadata>
       <playback>
         <format>
+          <type>statistics</type>
+          <url>http://bbb.blah.com/mock/statistics/0858103f804f6e06b6de665dab79584b22c7cf91-1511807048982</url>
+          <length/>
+        </format>
+        <format>
           <type>presentation</type>
           <url>http://bbb.blah.com/mock/playback/0858103f804f6e06b6de665dab79584b22c7cf91-1511807048982</url>
           <processingTime>9590</processingTime>
@@ -55,6 +60,11 @@
         <isBreakout>false</isBreakout>
       </metadata>
       <playback>
+        <format>
+          <type>statistics</type>
+          <url>http://bbb.blah.com/mock/statistics/0858103f804f6e06b6de665dab79584b22c7cf91-1511809970509</url>
+          <length/>
+        </format>
         <format>
           <type>presentation</type>
           <url>http://bbb.blah.com/mock/playback/0858103f804f6e06b6de665dab79584b22c7cf91-1511809970509</url>
