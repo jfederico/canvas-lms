@@ -41,9 +41,7 @@ describe 'BigBlueButton conferences' do
     initialize_big_blue_button_conference_plugin bbb_endpoint, bbb_secret
     course_with_teacher(name: 'Teacher Bob', active_all: true)
     course_with_ta(name: 'TA Alice', course: @course, active_all: true)
-    4.times do |i|
-      course_with_student(name: "Student_#{i + 1}", course: @course, active_all: true)
-    end
+    course_with_student(name: "Student John", course: @course, active_all: true)
   end
 
   before(:each) do
@@ -53,9 +51,6 @@ describe 'BigBlueButton conferences' do
 
   after { close_extra_windows }
   context 'when a conference is open' do
-    before(:once) do
-      stub_request(:get, /create/)
-    end
 
     context 'and the conference has no recordings' do
       before(:once) do
@@ -112,6 +107,23 @@ describe 'BigBlueButton conferences' do
       it 'teacher should see link for statistics', priority: '2' do
         show_recordings_in_first_conference_in_list
         verify_conference_includes_recordings_with_statistics
+      end
+    end
+
+    context 'and the conference has one recording with statistics' do
+      before(:once) do
+        stub_request(:get, /getRecordings/).
+          with(query: bbb_fixtures[:get_recordings]).
+          to_return(:body => big_blue_button_mock_response('get_recordings', 'one'))
+        @conference = create_big_blue_button_conference(bbb_fixtures[:get_recordings]['meetingID'])
+        @conference.add_user(@student, 'attendee')
+      end
+
+      it 'student should not see link for statistics', priority: '2' do
+        user_session(@student)
+        get conferences_index_page
+        show_recordings_in_first_conference_in_list
+        verify_conference_does_not_include_recordings_with_statistics
       end
     end
 
