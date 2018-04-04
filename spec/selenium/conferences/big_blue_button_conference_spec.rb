@@ -24,16 +24,16 @@ describe 'BigBlueButton conferences' do
   include ConferencesCommon
   include WebMock::API
 
-  bbb_endpoint = 'bbb.instructure.com'
-  bbb_secret = '8cd8ef52e8e101574e400365b55e11a6'
+  bbb_endpoint = 'bbb.blah.com'
+  bbb_secret = 'mock-secret'
   bbb_fixtures = {
     :get_recordings => {
       'meetingID' => 'instructure_web_conference_3Fn2k10wu0jK7diwJHs2FkDU0oXyX1ErUZCavikc',
-      'checksum' => 'ffa33deaa16e039bcbd84df90ed39196e518c69e'
+      'checksum' => '9f41063382ab155ccf75fe2f212846e3bb103579'
     },
     :delete_recordings => {
       'recordID' => '0225ccf234655ae60658ccac1e272d48781b491c-1511812307014',
-      'checksum' => 'f9a2b4c9b3e0dd611c1b541eee8bb32309a327ae'
+      'checksum' => '4aefca80ba80ba3d540295ea3e88215df77cf5cf'
     }
   }
 
