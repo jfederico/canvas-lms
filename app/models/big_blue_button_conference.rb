@@ -104,20 +104,10 @@ class BigBlueButtonConference < WebConference
       recording_id:     recording[:recordID],
       title:            recording[:name],
       duration_minutes: filter_duration(recording_formats),
-      playback_formats: filter_formats(recording_formats),
+      playback_url:     nil,
+      playback_formats: recording_formats,
       created_at:       recording[:startTime].to_i,
     }
-  end
-
-  def filter_duration(recording_formats)
-    # As not all the formats are the actual recording, identify the one that has :length
-    recording_formats.each do |recording_format|
-      return recording_format[:length].to_i if recording_format.key?(:length)
-    end
-  end
-
-  def filter_formats(recording_formats)
-    recording_formats.delete_if { |recording_format| recording_format[:length].nil? && user.id != self.user_id }
   end
 
   def delete_recording(recording_id)
@@ -237,6 +227,13 @@ class BigBlueButtonConference < WebConference
         hash[child.name.to_sym] = xml_to_value(child)
 
       end
+    end
+  end
+
+  def filter_duration(recording_formats)
+    # As not all the formats are the actual recording, identify the one that has :length
+    recording_formats.each do |recording_format|
+      return recording_format[:length].to_i if recording_format.key?(:length)
     end
   end
 end
