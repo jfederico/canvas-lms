@@ -102,7 +102,7 @@ test('deleteRecordings calls screenreader', function() {
     200,
     {'Content-Type': 'application/json'},
     JSON.stringify({
-      deleted: 'true',
+      deleted: true,
     })
   ])
   const big_blue_button_conference = {
@@ -138,4 +138,5 @@ test('deleteRecordings calls screenreader', function() {
   server.respond()
   equal($.screenReaderFlashMessage.callCount, 1)
   server.restore()
+  ok(view)
 })

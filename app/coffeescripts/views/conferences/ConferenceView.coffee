@@ -138,7 +138,7 @@ define [
           }
         ).done( (data, status) =>
           if data.deleted
-            return @removeRecordingRow($deleteButton)
+            return @removeRecordingRow($button)
           $.flashError(I18n.t("Sorry, the action performed on this recording failed. Try again later"))
         ).fail( (xhr, status) =>
           $.flashError(I18n.t("Sorry, the action performed on this recording failed. Try again later"))
