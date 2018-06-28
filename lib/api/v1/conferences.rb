@@ -24,7 +24,7 @@ module Api::V1::Conferences
       recordings join_url has_advanced_settings conference_key)
   }
 
-  def api_conferences_json(conferences, user, session)
+  def api_conferences_json(conferences, context, user, session)
     json = conferences.map do |c|
       api_json(c, user, session, API_CONFERENCE_JSON_OPTS)
     end
@@ -33,6 +33,7 @@ module Api::V1::Conferences
       j['long_running'] = value_to_boolean(j['long_running'])
       j['duration'] = j['duration'].to_i if j['duration']
       j['users'] = Array(j.delete('user_ids'))
+      j['url'] = named_context_url(context, :context_conference_url, j['id'])
     end
     {'conferences' => json}
   end

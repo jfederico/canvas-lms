@@ -173,7 +173,7 @@ class ConferencesController < ApplicationController
   def api_index(conferences)
     route = polymorphic_url([:api_v1, @context, :conferences])
     web_conferences = Api.paginate(conferences, self, route)
-    render json: api_conferences_json(web_conferences, @current_user, session)
+    render json: api_conferences_json(web_conferences, @context, @current_user, session)
   end
   protected :api_index
 

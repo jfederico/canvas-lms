@@ -38,6 +38,7 @@ class ApplicationController < ActionController::Base
   attr_reader :context
 
   include Api
+  include Application
   include LocaleSelection
   include Api::V1::User
   include Api::V1::WikiPage
@@ -377,25 +378,6 @@ class ApplicationController < ActionController::Base
 
   def rescue_action_dispatch_exception
     rescue_action_in_public(request.env['action_dispatch.exception'])
-  end
-
-  # used to generate context-specific urls without having to
-  # check which type of context it is everywhere
-  def named_context_url(context, name, *opts)
-    if context.is_a?(UserProfile)
-      name = name.to_s.sub(/context/, "profile")
-    else
-      klass = context.class.base_class
-      name = name.to_s.sub(/context/, klass.name.underscore)
-      opts.unshift(context)
-    end
-    opts.push({}) unless opts[-1].is_a?(Hash)
-    include_host = opts[-1].delete(:include_host)
-    if !include_host
-      opts[-1][:host] = context.host_name rescue nil
-      opts[-1][:only_path] = true unless name.end_with?("_path")
-    end
-    self.send name, *opts
   end
 
   def self.promote_view_path(path)
