@@ -84,20 +84,25 @@ describe BigBlueButtonConference do
       expect(@conference.craft_url(@user)).to match(/\Ahttps:\/\/bbb\.instructure\.com\/bigbluebutton\/api\/join/)
     end
 
-    it "should have a well formed user string as for recording_user_ready" do
-      expect(@conference.recording_ready_user).to eq "#{@user['name']} <#{@user.email}>"
+    it "should have a well formed and encrypted user string as for recording_user_ready" do
+      key = ActiveSupport::KeyGenerator.new("secret").generate_key("bbb.instructure.com", 32)
+      crypt = ActiveSupport::MessageEncryptor.new(key)
+      padded_user_email = crypt.decrypt_and_verify(@conference.recording_ready_user)
+      expect(padded_user_email.strip).to eq @user.email
     end
 
-    it "should have a well formed user string as for recording_user_ready in a group context" do
+    it "should have a well formed and encrypted user string as for recording_user_ready in a group context" do
       group1 = @course.groups.create!(:name => "group 1")
       group_conference = BigBlueButtonConference.create!(
         :title => "my group conference",
         :user => @user,
         :context => group1
       )
-      expect(group_conference.recording_ready_user).to eq "#{@user['name']} <#{@user.email}>"
+      key = ActiveSupport::KeyGenerator.new("secret").generate_key("bbb.instructure.com", 32)
+      crypt = ActiveSupport::MessageEncryptor.new(key)
+      padded_user_email = crypt.decrypt_and_verify(group_conference.recording_ready_user)
+      expect(padded_user_email.strip).to eq @user.email
     end
-
 
     it "return nil if a request times out" do
       allow(CanvasHttp).to receive(:get).and_raise(Timeout::Error)

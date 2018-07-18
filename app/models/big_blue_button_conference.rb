@@ -65,7 +65,10 @@ class BigBlueButtonConference < WebConference
 
   def recording_ready_user
     if self.grants_right?(self.user, :create)
-      "#{self.user['name']} <#{self.user.email}>"
+      padded_user_email = self.user.email.ljust(128, ' ')
+      key = ActiveSupport::KeyGenerator.new(config[:secret_dec]).generate_key(config[:domain], 32)
+      crypt = ActiveSupport::MessageEncryptor.new(key)
+      crypt.encrypt_and_sign(padded_user_email)
     end
   end
 
