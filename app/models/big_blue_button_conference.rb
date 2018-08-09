@@ -179,7 +179,7 @@ class BigBlueButtonConference < WebConference
   def generate_request(action, options)
     query_string = options.to_query
     query_string << ("&checksum=" + Digest::SHA1.hexdigest(action.to_s + query_string + config[:secret_dec]))
-    "https://#{config[:domain]}/bigbluebutton/api/#{action}?#{query_string}"
+    "http://#{config[:domain]}/bigbluebutton/api/#{action}?#{query_string}"
   end
 
   def send_request(action, options)

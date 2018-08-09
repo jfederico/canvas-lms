@@ -66,6 +66,17 @@
       {{#t "invite_all.course"}}Invite All Course Members{{/t}}
     {{/if}}
   </label>
+  <select id="member_selector" class="member_selector">
+    {{#if context_is_group }}
+      <option value="all" selected="selected">{{#t "invite_all.group"}}Invite All Group Members{{/t}}</option>
+      <option value="selected">{{#t "invite_selected.group"}}Invite Selected Group Members{{/t}}</option>
+      <option value="students">{{#t "invite_students.group"}}Invite Only Group Students{{/t}}</option>
+    {{else}}
+      <option value="all" selected="selected">{{#t "invite_all.course"}}Invite All Course Members{{/t}}</option>
+      <option value="selected">{{#t "invite_selected.course"}}Invite Selected Course Members{{/t}}</option>
+      <option value="students">{{#t "invite_students.course"}}Invite Only Course Students{{/t}}</option>
+    {{/if}}
+    </select>
   <div>
     <ul id="members_list" style="border: 1px solid #333; padding: 10px; overflow-y: auto; max-height: 150px;">
       {{# each users}}

@@ -37,6 +37,7 @@ define [
       close: @onClose
 
     events:
+      'click .member_selector': 'selectInvitedMembers'
       'click .all_users_checkbox': 'toggleAllUsers'
       'change #web_conference_long_running': 'changeLongRunning'
       'change #web_conference_conference_type': 'renderConferenceFormUserSettings'
@@ -44,6 +45,7 @@ define [
     render: ->
       super
       @delegateEvents()
+      @selectInvitedMembers()
       @toggleAllUsers()
       @markInvitedUsers()
       @renderConferenceFormUserSettings()
@@ -187,6 +189,15 @@ define [
         if(!this.disabled)
             $(this).datetime_field(alwaysShowTime: true)
       )
+
+    selectInvitedMembers: ->
+      $selected = @$('.member_selector').find(':selected')
+      console.info $selected
+      console.info $selected.val()
+      if($selected.val() == 'all' || $selected.val() == 'students')
+        $("#members_list").hide()
+      else
+        $("#members_list").slideDown()
 
     toggleAllUsers: ->
       if(@$('.all_users_checkbox').is(':checked'))
