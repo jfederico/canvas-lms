@@ -92,7 +92,7 @@ define [
       conferenceData = super
       is_editing = !@model.isNew()
       is_adding = !is_editing
-      invite_all = is_adding
+      invite_selected = is_editing
       @updateConferenceUserSettingDetailsForConference(conferenceData)
       conferenceData['http_method'] = if is_adding then 'POST' else 'PUT'
       if (conferenceData.duration == null)
@@ -120,7 +120,7 @@ define [
         conferenceTypes: ENV.conference_type_details.map((type) ->
           {name: type.name, type: type.type, selected: (conferenceData.conference_type == type.type)}
         )
-        inviteAll: invite_all
+        inviteSelected: invite_selected
 
     updateConferenceUserSettingDetailsForConference: (conferenceData) ->
       # make handlebars comparisons easy

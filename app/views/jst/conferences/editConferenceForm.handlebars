@@ -71,28 +71,35 @@
     <div class="controls">
       <select id="member_selector" class="member_selector">
         {{#if context_is_group }}
-          <option value="all" selected="selected">{{#t "all.group"}}All Group Members{{/t}}</option>
+          <option value="all" {{^inviteSelected}}{{selected="selected"}}{{/inviteSelected}}>{{#t "all.group"}}All Group Members{{/t}}</option>
           <option value="students">{{#t "students.group"}}Only Group Students{{/t}}</option>
-          <option value="selected">{{#t "selected.group"}}Selected Group Members{{/t}}</option>
+          <option value="selected" {{#inviteSelected}}{{selected="selected"}}{{/inviteSelected}}>{{#t "selected.group"}}Selected Group Members{{/t}}</option>
         {{else}}
-          <option value="all" selected="selected">{{#t "all.course"}}All Course Members{{/t}}</option>
+          <option value="all" {{^inviteSelected}}{{selected="selected"}}{{/inviteSelected}}>{{#t "all.course"}}All Course Members{{/t}}</option>
           <option value="students">{{#t "students.course"}}Only Course Students{{/t}}</option>
-          <option value="selected">{{#t "selected.course"}}Selected Course Members{{/t}}</option>
+          <option value="selected" {{#inviteSelected}}{{selected="selected"}}{{/inviteSelected}}>{{#t "selected.course"}}Selected Course Members{{/t}}</option>
         {{/if}}
       </select>
     </div>
   </div>
-  <div>
-    <ul id="members_list" style="border: 1px solid #333; padding: 10px; overflow-y: auto; max-height: 150px;">
+  <div style="border: 1px solid #333; padding: 10px; overflow-y: auto; max-height: 150px;">
+    <table id="members_list" class="ic-Table ic-Table--hover-row ic-Table--condensed">
       {{# each users}}
-        <li class="member user_{{id}}">
-          <label class="checkbox" for="user_{{id}}">
-            <input name="user[{{id}}]" type="hidden" value="0">
-            <input id="user_{{id}}" name="user[{{id}}]" type="checkbox" value="1">
+        <tr class="member user_{{id}}">
+          <td>
+            <label class="checkbox" for="user_{{id}}">
+              <input name="user[{{id}}]" type="hidden" value="0">
+              <input id="user_{{id}}" name="user[{{id}}]" type="checkbox" value="1">
+            </label>
+          </td>
+          <td>
             {{name}}
-          </label>
-        </li>
+          </td>
+          <td>
+            {{#t}}Member{{/t}}
+          </td>
+        </tr>
       {{/each}}
-    </ul>
+    </table>
   </div>
 </form>
