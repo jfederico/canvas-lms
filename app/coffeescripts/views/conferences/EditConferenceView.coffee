@@ -38,7 +38,6 @@ define [
 
     events:
       'click .member_selector': 'selectInvitedMembers'
-      'click .all_users_checkbox': 'toggleAllUsers'
       'change #web_conference_long_running': 'changeLongRunning'
       'change #web_conference_conference_type': 'renderConferenceFormUserSettings'
 
@@ -46,7 +45,6 @@ define [
       super
       @delegateEvents()
       @selectInvitedMembers()
-      @toggleAllUsers()
       @markInvitedUsers()
       @renderConferenceFormUserSettings()
       @$('form').formSubmit(
@@ -92,6 +90,7 @@ define [
       conferenceData = super
       is_editing = !@model.isNew()
       is_adding = !is_editing
+      invite_all = is_adding
       invite_selected = is_editing
       @updateConferenceUserSettingDetailsForConference(conferenceData)
       conferenceData['http_method'] = if is_adding then 'POST' else 'PUT'
@@ -120,6 +119,7 @@ define [
         conferenceTypes: ENV.conference_type_details.map((type) ->
           {name: type.name, type: type.type, selected: (conferenceData.conference_type == type.type)}
         )
+        inviteAll: invite_all
         inviteSelected: invite_selected
 
     updateConferenceUserSettingDetailsForConference: (conferenceData) ->
@@ -193,12 +193,6 @@ define [
     selectInvitedMembers: ->
       $selected = @$('.member_selector').find(':selected')
       if($selected.val() == 'all' || $selected.val() == 'students')
-        $("#members_list").hide()
-      else
-        $("#members_list").slideDown()
-
-    toggleAllUsers: ->
-      if(@$('.all_users_checkbox').is(':checked'))
         $("#members_list").hide()
       else
         $("#members_list").slideDown()
