@@ -61,6 +61,8 @@
   <div class="control-group">
     <label class="control-label" for="member_selector">{{#t "invite"}}Invite{{/t}}</label>
     <div class="controls">
+      <input type="hidden" id="user_all" name="user[all]"{{#inviteAll}} value="1"{{/inviteAll}}>
+      <input type="hidden" id="user_students" name="user[students]" value="0">
       <select id="member_selector" class="member_selector">
         {{#if context_is_group }}
           <option value="all" {{#inviteAll}}selected="selected"{{/inviteAll}}>{{#t "all.group"}}All Group Members{{/t}}</option>
