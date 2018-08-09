@@ -71,13 +71,13 @@
     <div class="controls">
       <select id="member_selector" class="member_selector">
         {{#if context_is_group }}
-          <option value="all" {{^inviteSelected}}{{selected="selected"}}{{/inviteSelected}}>{{#t "all.group"}}All Group Members{{/t}}</option>
+          <option value="all">{{#t "all.group"}}All Group Members{{/t}}</option>
           <option value="students">{{#t "students.group"}}Only Group Students{{/t}}</option>
-          <option value="selected" {{#inviteSelected}}{{selected="selected"}}{{/inviteSelected}}>{{#t "selected.group"}}Selected Group Members{{/t}}</option>
+          <option value="selected" {{#inviteSelected}}selected="selected"{{/inviteSelected}}>{{#t "selected.group"}}Selected Group Members{{/t}}</option>
         {{else}}
-          <option value="all" {{^inviteSelected}}{{selected="selected"}}{{/inviteSelected}}>{{#t "all.course"}}All Course Members{{/t}}</option>
+          <option value="all">{{#t "all.course"}}All Course Members{{/t}}</option>
           <option value="students">{{#t "students.course"}}Only Course Students{{/t}}</option>
-          <option value="selected" {{#inviteSelected}}{{selected="selected"}}{{/inviteSelected}}>{{#t "selected.course"}}Selected Course Members{{/t}}</option>
+          <option value="selected" {{#inviteSelected}}selected="selected"{{/inviteSelected}}>{{#t "selected.course"}}Selected Course Members{{/t}}</option>
         {{/if}}
       </select>
     </div>
@@ -96,7 +96,11 @@
             {{name}}
           </td>
           <td>
-            {{#t}}Member{{/t}}
+            {{#if context_is_group }}
+              {{#t}}Group Member{{/t}}
+            {{else}}
+              {{#t}}Course Member{{/t}}
+            {{/if}}
           </td>
         </tr>
       {{/each}}
