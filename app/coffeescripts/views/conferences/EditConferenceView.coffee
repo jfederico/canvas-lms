@@ -192,8 +192,6 @@ define [
 
     selectInvitedMembers: ->
       $selected = @$('.member_selector').find(':selected')
-      console.info $selected
-      console.info $selected.val()
       if($selected.val() == 'all' || $selected.val() == 'students')
         $("#members_list").hide()
       else
