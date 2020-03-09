@@ -63,6 +63,11 @@ class BigBlueButtonConference < WebConference
     conference_key
   end
 
+  def recording_ready!
+    super
+    Rails.cache.delete(conference_recordings: conference_key)
+  end
+
   def recording_ready_user
     if self.grants_right?(self.user, :create)
       "#{self.user['name']} <#{self.user.email}>"
@@ -168,12 +173,21 @@ class BigBlueButtonConference < WebConference
 
   def fetch_recordings
     return [] unless conference_key && settings[:record]
+    Array(fetch_recordings_cached || fetch_recordings_online)
+  end
+
+  def fetch_recordings_cached
+    Rails.cache.read(conference_recordings: conference_key)
+  end
+
+  def fetch_recordings_online
     response = send_request(:getRecordings, {
       :meetingID => conference_key,
       })
     result = response[:recordings] if response
     result = [] if result.is_a?(String)
-    Array(result)
+    Rails.cache.write(conference_recordings: conference_key, result) unless result.empty?
+    result
   end
 
   def generate_request(action, options)
